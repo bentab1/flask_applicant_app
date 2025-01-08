@@ -178,7 +178,7 @@ def submit():
     # Check if the form is open based on the access code and FORM_OPEN status
     valid_code = AccessCode.query.filter_by(code=access_code).first()
     if not valid_code or valid_code.expiration_date < datetime.now() or not FORM_OPEN:
-        flash("This application has closed, please come back some other time.", "danger")
+        flash("This application has closed or you have entered wrong access code,  please or double-check your code come back some other time.", "danger")
         return redirect(url_for('index'))
     # Check if the role is open
     if ROLE_OPEN_STATUS.get(role) == False:
