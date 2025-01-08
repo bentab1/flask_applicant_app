@@ -15,8 +15,7 @@ import string
 app = Flask(__name__)
 load_dotenv()  # Load environment variables from .env file
 
-# app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'postgresql://postgres:deployment1234@154.53.42.12/deployment')
-app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'postgresql://postgres:1234@localhost/test_deployment')
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'postgresql://postgres:deployment1234@154.53.42.12/deployment')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # Setup folder to save CV and Cover Letter
@@ -141,7 +140,7 @@ def generate_random_code(length=6):
     return random.randint(start, end)
 
 
-@app.route('/', methods=['GET', 'POST'])
+@app.route('/application-form', methods=['GET', 'POST'])
 def index():
     error_message = None
     role = None  # Initialize role variable to avoid undefined errors
@@ -178,7 +177,7 @@ def submit():
     # Check if the form is open based on the access code and FORM_OPEN status
     valid_code = AccessCode.query.filter_by(code=access_code).first()
     if not valid_code or valid_code.expiration_date < datetime.now() or not FORM_OPEN:
-        flash("This application has closed or you have entered wrong access code,  please or double-check your code come back some other time.", "danger")
+        flash("This application has closed or you have entered wrong access code, please double-chech your access code or  come back some other time.", "danger")
         return redirect(url_for('index'))
     # Check if the role is open
     if ROLE_OPEN_STATUS.get(role) == False:
