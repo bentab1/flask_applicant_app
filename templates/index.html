@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Applicant Submission Form</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+  <div class="form-container">
+    <h1>Applicant Submission Form</h1>
+    <h3>Follow the Instructions, Please!!</h3>
+    <h5>Note: Please make sure you select the exact role/job advertised and follow all the job description instructions.</h5>
+    <p>If you encounter any problems with the application, contact us at <a href="mailto:info@paycaretech.world">info@paycaretech.world</a>.</p>
+    
+    <!-- Flash messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <ul>
+          {% for category, message in messages %}
+            <li class="{{ category }}">{{ message }}</li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+    {% endwith %}
+
+    <!-- Hide form if application is successful or already applied -->
+    {% if not success and not already_applied %}
+    <form id="toggleStatusForm" action="{{ url_for('submit') }}" method="POST" enctype="multipart/form-data">
+      <label for="role">Select the role/job you are applying for:</label>
+      <select id="role" name="role" required>
+          <option value="" disabled selected>Select role/job</option>
+          {% for role in active_roles %}
+              <option value="{{ role }}">{{ role }}</option>
+          {% endfor %}
+      </select>
+
+      <label for="state">State:</label>
+      <select id="state" name="state" required>
+        <option value="" disabled selected>Select your state</option>
+        <!-- List of states -->
+        <option value="Abia">Abia</option>
+        <option value="Abuja">Abuja</option>
+        <option value="Adamawa">Adamawa</option>
+        <option value="Akwa Ibom">Akwa Ibom</option>
+        <option value="Anambra">Anambra</option>
+        <option value="Bauchi">Bauchi</option>
+        <option value="Bayelsa">Bayelsa</option>
+        <option value="Benue">Benue</option>
+        <option value="Borno">Borno</option>
+        <option value="Cross River">Cross River</option>
+        <option value="Delta">Delta</option>
+        <option value="Ebonyi">Ebonyi</option>
+        <option value="Edo">Edo</option>
+        <option value="Ekiti">Ekiti</option>
+        <option value="Enugu">Enugu</option>
+        <option value="Gombe">Gombe</option>
+        <option value="Imo">Imo</option>
+        <option value="Jigawa">Jigawa</option>
+        <option value="Kaduna">Kaduna</option>
+        <option value="Kano">Kano</option>
+        <option value="Katsina">Katsina</option>
+        <option value="Kebbi">Kebbi</option>
+        <option value="Kogi">Kogi</option>
+        <option value="Kwara">Kwara</option>
+        <option value="Lagos">Lagos</option>
+        <option value="Nasarawa">Nasarawa</option>
+        <option value="Niger">Niger</option>
+        <option value="Ogun">Ogun</option>
+        <option value="Ondo">Ondo</option>
+        <option value="Osun">Osun</option>
+        <option value="Oyo">Oyo</option>
+        <option value="Plateau">Plateau</option>
+        <option value="Rivers">Rivers</option>
+        <option value="Sokoto">Sokoto</option>
+        <option value="Taraba">Taraba</option>
+        <option value="Yobe">Yobe</option>
+        <option value="Zamfara">Zamfara</option>
+      </select>
+
+      <label for="lga">Local Government Area (LGA):</label>
+      <input type="text" id="lga" name="lga" placeholder="Enter LGA" required>
+
+      <label for="ward">Your Council Ward:</label>
+      <input type="text" id="ward" name="ward" placeholder="Enter Council Ward" required>
+
+      <label for="name">Full Name:</label>
+      <input type="text" id="name" name="name" placeholder="Enter full name" required>
+
+      <div class="phone-container">
+        <label for="phone">Phone Number:</label>
+        <select id="countryCode" name="countryCode" required>
+          <option value="+234">+234 (Nigeria)</option>
+          <option value="+1">+1 (USA)</option>
+          <option value="+44">+44 (UK)</option>
+          <option value="+91">+91 (India)</option>
+          <option value="+61">+61 (Australia)</option>
+          <option value="+49">+49 (Germany)</option>
+          <option value="+33">+33 (France)</option>
+          <option value="+81">+81 (Japan)</option>
+          <option value="+39">+39 (Italy)</option>
+          <option value="+55">+55 (Brazil)</option>
+          <option value="+52">+52 (Mexico)</option>
+          <option value="+34">+34 (Spain)</option>
+          <option value="+97">+97 (Middle East)</option>
+          <option value="+63">+63 (Philippines)</option>
+          <option value="+27">+27 (South Africa)</option>
+          <option value="+20">+20 (Egypt)</option>
+          <option value="+7">+7 (Russia)</option>
+          <option value="+32">+32 (Belgium)</option>
+          <option value="+31">+31 (Netherlands)</option>
+          <option value="+81">+81 (Japan)</option>
+          <option value="+47">+47 (Norway)</option>
+        </select>
+        <input type="tel" id="phone" name="phone" placeholder="Enter the rest 10-digit of your phone number. eg. 8160052390" pattern="[0-9]{10}" required title="Please enter exactly 11 digits" maxlength="11">
+      </div>
+
+      <label for="email">Email Address:</label>
+      <input type="email" id="email" name="email" placeholder="Enter email address eg. johnmark@gmail.com" required pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$" title="Please enter a valid email address">
+
+      <label for="address">Address:</label>
+      <textarea id="address" name="address" placeholder="Enter address" required></textarea>
+
+      <label for="occupation">Current Occupation:</label>
+      <input type="text" id="occupation" name="occupation" placeholder="Enter occupation" required>
+
+      <label for="cv">Upload CV (Accepted formats: .pdf, .doc, .docx, Max size: 2MB):</label>
+      <input type="file" id="cv" name="cv" accept=".pdf,.doc,.docx" required>
+
+      <label for="coverLetter">Upload Cover Letter (Accepted formats: .pdf, .doc, .docx, Max size: 2MB):</label>
+      <input type="file" id="coverLetter" name="coverLetter" accept=".pdf,.doc,.docx" required>
+
+
+      <!-- Access Code Input -->
+      <label for="accesscode">Enter Access Code:</label>
+      <input type="text" id="accesscode" name="accesscode" placeholder="Enter access code" required>
+
+      <button type="submit">Submit</button>
+    </form>
+    {% endif %}
+
+    <!-- Message if the user already applied -->
+    {% if already_applied %}
+    <div class="error-message">
+      <p>You have already applied with this phone number or email.</p>
+    </div>
+    {% endif %}
+  </div>
+
+  <script>
+    // Wait for the DOM to fully load before executing the script
+    document.addEventListener('DOMContentLoaded', function() {
+        const roleSelect = document.getElementById('role');
+
+        roleSelect.addEventListener('change', function() {
+            // Get the selected role ID
+            const selectedRoleId = roleSelect.value;
+            
+            // Set the action dynamically to include the role_id
+            if (selectedRoleId) {
+                form.action = `/admin/toggle_status/${selectedRoleId}`;
+            }
+        });
+    });
+  </script>
+</body>
+</html>

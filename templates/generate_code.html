@@ -1,0 +1,22 @@
+<!-- templates/generate_code.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generated Codes</title>
+</head>
+<body>
+    <h1>Generated Codes</h1>
+
+    <!-- Displaying all the generated codes -->
+    <ul>
+        {% for code in all_codes %}
+            <li>{{ code }}</li>
+        {% else %}
+            <p>No codes generated yet.</p>
+        {% endfor %}
+    </ul>
+
+</body>
+</html>

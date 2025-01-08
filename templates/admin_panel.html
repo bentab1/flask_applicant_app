@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Panel - Manage Roles and Access Codes</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='admin_styles.css') }}">
+</head>
+<body>
+  <div class="admin-container">
+    <header>
+      <h1>Admin Panel</h1>
+      <h3>Manage Roles and Access Codes</h3>
+      <p>Welcome to the admin panel. You can manage role statuses and generate access codes with expiration dates.</p>
+    </header>
+
+    <!-- Flash messages for success or errors -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <ul class="flash-messages">
+          {% for category, message in messages %}
+            <li class="{{ category }}">{{ message }}</li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+    {% endwith %}
+
+    <!-- Access Code Generation Section -->
+    {% if session.get('is_admin') %}
+      <section class="code-generation">
+        <h2>Generate Access Code</h2>
+        
+        <!-- Display Form to Generate Access Code -->
+        <form action="{{ url_for('generate_code') }}" method="POST">
+          <div class="form-group">
+            <label for="expiration_date">Expiration Date:</label>
+            <input type="datetime-local" id="expiration_date" name="expiration_date" required>
+          </div>
+          <button type="submit" class="submit-btn">Generate Code</button>
+        </form>
+        
+        <!-- Display Existing Access Codes -->
+        <h3>Existing Access Codes</h3>
+        <table class="code-table" border="1">
+          <thead>
+            <tr>
+              <th>Access Code</th>
+              <th>Expiration Date</th>
+              <th>Created At</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for code in all_codes %}
+              <tr>
+                <td>{{ code.code }}</td>
+                <td>{{ code.expiration_date }}</td>
+                <td>{{ code.created_at }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </section>
+    {% endif %}
+
+    <!-- Role Management Section -->
+    <section class="role-management">
+      <h2>Role Management</h2>
+      <p>Manage the status of roles by toggling their active or inactive state.</p>
+      <table class="role-table">
+        <thead>
+          <tr>
+            <th>Role</th>
+            <th>Status</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for role in roles %}
+            <tr>
+              <td>{{ role.name }}</td>
+              <td>
+                <span class="status {{ 'active' if role.status == 'active' else 'inactive' }}">
+                  {{ role.status | capitalize }}
+                </span>
+              </td>
+              <td>
+                <form action="{{ url_for('admin_toggle_status', role_name=role.id) }}" method="POST">
+                  <button type="submit" class="toggle-btn">
+                    Toggle Status
+                  </button>
+                </form>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </section>
+    <!-- Logout Button -->
+  <form action="{{ url_for('logout') }}" method="GET" style="text-align: right;">
+    <button type="submit" class="logout-btn">Logout</button>
+  </form>
+  </div>
+  
+  <script>
+    document.querySelectorAll('.toggle-btn').forEach(button => {
+      button.addEventListener('click', function(e) {
+        if (!confirm('Are you sure you want to toggle this role\'s status?')) {
+          e.preventDefault();
+        }
+      });
+    });
+  </script>
+</body>
+</html>
