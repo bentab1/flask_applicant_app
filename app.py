@@ -280,7 +280,7 @@ def admin_panel():
         flash('Settings updated successfully!', 'success')
         return redirect(url_for('admin_panel'))
 
-    # Convert ROLE_OPEN_STATUS dictionary to a list of roles with names and statuses
+   # Convert ROLE_OPEN_STATUS dictionary to a list of roles with names and statuses
     roles = [{'id': role, 'name': role, 'status': 'active' if ROLE_OPEN_STATUS[role] else 'inactive'} for role in
              ROLE_OPEN_STATUS]
 
