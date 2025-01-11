@@ -54,7 +54,6 @@ ROLE_OPEN_STATUS = {
     'backend Software developer': True
 }
 
-
 class AccessCode(db.Model):
     __tablename__ = 'access_codes'
     id = db.Column(db.Integer, primary_key=True)
