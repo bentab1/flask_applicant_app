@@ -15,7 +15,7 @@ import string
 app = Flask(__name__)
 load_dotenv()  # Load environment variables from .env file
 
-app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'postgresql://postgres:deployment1234@154.53.42.12/deployment')
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'postgresql://postgres:1234Abcd@154.53.42.12/deployment')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # Setup folder to save CV and Cover Letter
