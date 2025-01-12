@@ -140,7 +140,7 @@ def generate_random_code(length=6):
     return random.randint(start, end)
 
 
-@app.route('/', methods=['GET', 'POST'])
+@app.route('/application-form', methods=['GET', 'POST'])
 def index():
     error_message = None
     role = None
@@ -165,7 +165,7 @@ def index():
 
 
 # Route to handle form submission
-@app.route('/application-form', methods=['POST'])
+@app.route('/submit', methods=['POST'])
 def submit():
     role = request.form.get('role')
     access_code = request.form.get('accesscode')
