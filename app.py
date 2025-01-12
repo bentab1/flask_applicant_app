@@ -165,7 +165,7 @@ def index():
 
 
 # Route to handle form submission
-@app.route('/submit', methods=['POST'])
+@app.route('/application-form', methods=['POST'])
 def submit():
     role = request.form.get('role')
     access_code = request.form.get('accesscode')
@@ -395,7 +395,7 @@ def login():
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
-        if username == 'admin' and password == 'admin123':
+        if username == 'admin' and password == 'admin123@admin123':
             session['is_admin'] = True
             return redirect(url_for('admin_panel'))
         flash('Invalid credentials', 'danger')
