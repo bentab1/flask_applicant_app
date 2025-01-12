@@ -15,7 +15,7 @@ import string
 app = Flask(__name__)
 load_dotenv()  # Load environment variables from .env file
 
-app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'postgresql://postgres:1234Abcd@154.53.42.12/deployment')
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'postgresql://postgres:deployment1234@154.53.42.12/deployment')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # Setup folder to save CV and Cover Letter
@@ -354,7 +354,7 @@ def admin_toggle_status(role_name):
     else:
         flash(f"Invalid role name: '{role_name}'", 'danger')
 
-    return redirect(url_for('admin_panel'))
+    return redirect(url_for('admin_panel') + '?refresh=true')
 
 
 # Admin login route
