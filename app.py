@@ -15,12 +15,13 @@ import string
 app = Flask(__name__)
 load_dotenv()  # Load environment variables from .env file
 
+# app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'postgresql://postgres:deployment1234@154.53.42.12/deployment')
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'postgresql://postgres:1234Abcd@154.53.42.12/deployment')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # Setup folder to save CV and Cover Letter
 base_dir = os.path.abspath(os.path.dirname(__file__))  # Get the absolute path of the current file
-app.config['UPLOAD_FOLDER'] = os.path.join(base_dir, 'Files')  # Join base directory with 'Files'
+app.config['UPLOAD_FOLDER'] = os.path.join(base_dir, 'file')  # Join base directory with 'Files'
 
 # Allowed file extensions
 app.config['ALLOWED_EXTENSIONS'] = {'pdf', 'doc', 'docx'}
@@ -43,16 +44,16 @@ nigerian_tz = pytz.timezone('Africa/Lagos')
 
 # Default status values (These can be updated by admin in the backend)
 FORM_OPEN = True  # True if form is open, False if closed
-ROLE_OPEN_STATUS = {
-    'Aggregator': True,
-    'Agent': True,
-    'Sales': False,
-    'Customer Care': True,
-    'Finance': False,
-    'Cooperate Lawyer': True,
-    'Frontend Software developer': True,
-    'backend Software developer': True
-}
+class RoleStatus(db.Model):
+    __tablename__ = 'role_status'
+
+    id = db.Column(db.Integer, primary_key=True)
+    role_name = db.Column(db.String(100), nullable=False, unique=True)
+    is_active = db.Column(db.Boolean, default=True)
+
+    def __repr__(self):
+        return f'<RoleStatus {self.role_name}>'
+    
 
 class AccessCode(db.Model):
     __tablename__ = 'access_codes'
@@ -139,32 +140,28 @@ def generate_random_code(length=6):
     return random.randint(start, end)
 
 
-@app.route('/application-form', methods=['GET', 'POST'])
+@app.route('/', methods=['GET', 'POST'])
 def index():
     error_message = None
-    role = None  # Initialize role variable to avoid undefined errors
-
-    # Filter the active roles only
-    active_roles = [role_name for role_name, status in ROLE_OPEN_STATUS.items() if status]
+    role = None
+   
+    # Filter the active roles based on the database
+    active_roles = [role_name for role_name, in db.session.query(RoleStatus.role_name).filter_by(is_active=True).all()]
 
     if request.method == 'POST':
         role = request.form.get('role')
         access_code = request.form.get('accesscode')
 
-        # Check if access code is entered and valid
         valid_code = AccessCode.query.filter_by(code=access_code).first()
         if valid_code and valid_code.expiration_date > datetime.now():
-            if ROLE_OPEN_STATUS.get(role) == False:
+            if role not in active_roles:
                 error_message = "This role is closed, please check back some other time."
 
         else:
             error_message = "Invalid or expired access code. Please try again later."
 
-    return render_template('index.html',
-                           role_open_status=ROLE_OPEN_STATUS,
-                           error_message=error_message,
-                           role=role,
-                           active_roles=active_roles)  # Pass active roles to the template
+    return render_template('index.html', error_message=error_message, role=role, active_roles=active_roles)
+
 
 
 # Route to handle form submission
@@ -176,10 +173,12 @@ def submit():
     # Check if the form is open based on the access code and FORM_OPEN status
     valid_code = AccessCode.query.filter_by(code=access_code).first()
     if not valid_code or valid_code.expiration_date < datetime.now() or not FORM_OPEN:
-        flash("This application has closed or you have entered wrong access code,  please or double-check your code come back some other time.", "danger")
+        flash("This application has closed or you have entered wrong access code,  please double-check your access code or come back some other time.", "danger")
         return redirect(url_for('index'))
-    # Check if the role is open
-    if ROLE_OPEN_STATUS.get(role) == False:
+    
+    # Check if the role is open in the database
+    role_status = RoleStatus.query.filter_by(role_name=role).first()
+    if not role_status or not role_status.is_active:
         flash("This role is closed, please check back some other time.", "danger")
         return redirect(url_for('index'))
 
@@ -264,97 +263,130 @@ def submit():
     # Redirect to the home page with success message
     return redirect(url_for('index', success=True))
 
-
-# admin route to admin panel
+# Admin route to admin panel
 @app.route('/admin', methods=['GET', 'POST'])
-@admin_required
+@admin_required  # Assuming you have an admin_required decorator to protect the admin panel
 def admin_panel():
-    global FORM_OPEN, ROLE_OPEN_STATUS
+    FORM_OPEN = 'form_open' in request.form
 
     if request.method == 'POST':
-        FORM_OPEN = 'form_open' in request.form
-        for role in ROLE_OPEN_STATUS:
-            ROLE_OPEN_STATUS[role] = role in request.form
+        # Update role statuses in the database
+        for role in request.form:
+            if role != 'form_open':  # Skip form_open field
+                # Check if the role exists in the database
+                role_status = RoleStatus.query.filter_by(role_name=role).first()
 
+                if role_status:
+                    # Toggle the status: set it to True if role is in the form (checked), False otherwise
+                    role_status.is_active = True if role in request.form else False
+                else:
+                    # If the role does not exist in the database, create a new role and set its active status based on the form
+                    new_role_status = RoleStatus(role_name=role, is_active=True if role in request.form else False)
+                    db.session.add(new_role_status)
+
+        # Commit all changes to the database after the loop
+        db.session.commit()
+
+        # Flash a success message
         flash('Settings updated successfully!', 'success')
+
+        # Redirect to the admin panel
         return redirect(url_for('admin_panel'))
 
-   # Convert ROLE_OPEN_STATUS dictionary to a list of roles with names and statuses
-    roles = [{'id': role, 'name': role, 'status': 'active' if ROLE_OPEN_STATUS[role] else 'inactive'} for role in
-             ROLE_OPEN_STATUS]
-
-    # Fetch the latest 3 access codes from the database
+    # Fetch all roles from the database, sorted by role_name (or any other column you prefer)
+    roles = RoleStatus.query.order_by(RoleStatus.role_name).all()  # Sorted by role_name
     all_codes = AccessCode.query.order_by(AccessCode.created_at.desc()).limit(2).all()
 
     return render_template('admin_panel.html', form_open=FORM_OPEN, roles=roles, all_codes=all_codes)
 
 
+
 # Admin route to generate access code
-@app.route('/generate_code', methods=['GET', 'POST'])
+# Admin route to generate access code
+@app.route('/generate_code', methods=['POST'])
 @admin_required
 def generate_code():
-    if request.method == 'POST':
-        expiration_date_str = request.form.get('expiration_date')
-        try:
-            # Convert expiration date from string to datetime object
-            expiration_date = datetime.strptime(expiration_date_str, '%Y-%m-%dT%H:%M')
+    expiration_date_str = request.form.get('expiration_date')
+    try:
+        expiration_date = datetime.strptime(expiration_date_str, '%Y-%m-%dT%H:%M')
 
-            # Check if the expiration date is in the future or now
-            if expiration_date < datetime.now():
-                flash("Can't generate past date. Please enter the current or a future date.", "danger")
-
-                # Fetch the roles and access codes to render the admin panel correctly
-                roles = [{'id': role, 'name': role, 'status': 'active' if ROLE_OPEN_STATUS[role] else 'inactive'} for
-                         role in ROLE_OPEN_STATUS]
-                all_codes = AccessCode.query.order_by(AccessCode.expiration_date.desc()).limit(2).all()
-
-                return render_template('admin_panel.html', form_open=FORM_OPEN, roles=roles, all_codes=all_codes)
-
-            # Generate and save the new code
+        if expiration_date < datetime.now():
+            flash("Can't generate past date. Please enter the current or a future date.", "danger")
+        else:
+            # Generate new code
             new_code = generate_random_code()
             new_access_code = AccessCode(code=new_code, expiration_date=expiration_date)
             db.session.add(new_access_code)
             db.session.commit()
 
-            # Invalidate old codes by setting their expiration date to now
+            # Invalidate old codes
             AccessCode.query.filter(AccessCode.code != new_code).update(
                 {AccessCode.expiration_date: datetime.now()}
             )
             db.session.commit()
 
-            # Store the newly generated code and expiration date in session
-            session['generated_code'] = new_code
-            session['expiration_date'] = expiration_date.strftime('%Y-%m-%d %H:%M')
+            flash("Access code generated successfully!", "success")
+    except ValueError:
+        flash("Invalid expiration date format! Please use YYYY-MM-DDTHH:MM.", "danger")
 
-            flash("Access code generated successfully! Existing codes have been invalidated.", "success")
-        except ValueError:
-            flash("Invalid expiration date format!", "danger")
+    return redirect(url_for('admin_panel'))
 
-            # Fetch the roles and access codes to render the admin panel correctly
-            roles = [{'id': role, 'name': role, 'status': 'active' if ROLE_OPEN_STATUS[role] else 'inactive'} for role
-                     in ROLE_OPEN_STATUS]
-            all_codes = AccessCode.query.order_by(AccessCode.expiration_date.desc()).all()
+# Route to render the admin panel, add roles, and remove roles
+@app.route('/admin/roles', methods=['GET', 'POST'])
+def manage_roles():
+    if request.method == 'POST':
+        role_name = request.form['role_name']
+        is_active = request.form['is_active'] == 'True'  # Convert string to boolean
 
-            return render_template('admin_panel.html', form_open=FORM_OPEN, roles=roles, all_codes=all_codes)
+        # Check if the role already exists
+        existing_role = RoleStatus.query.filter_by(role_name=role_name).first()
+        if existing_role:
+            flash("This role already exists, please enter another role.", 'danger')
+            return redirect(url_for('admin_panel'))
 
-        return redirect(url_for('admin_panel'))  # Redirect to admin panel after generating the code
+        # Create and save the new role to the database
+        new_role = RoleStatus(role_name=role_name, is_active=is_active)
+        db.session.add(new_role)
+        db.session.commit()
 
-    return render_template('generate_code.html')  # Render the code generation form
+        flash('New role added successfully!', 'success')
+        return redirect(url_for('admin_panel'))  # Redirect to the same page
+
+    # Query all roles from the database
+    roles = RoleStatus.query.all()
+    active_roles = [role.role_name for role in roles if role.is_active]
+    return render_template('admin_panel', roles=roles, active_roles=active_roles)
 
 
-# Admin toggle role status route
-@app.route('/admin/toggle_status/<string:role_name>', methods=['POST'])
+# Route to handle role status toggling
+@app.route('/admin/toggle_role_status/<int:role_id>', methods=['POST'])
 @admin_required
-def admin_toggle_status(role_name):
-    if role_name in ROLE_OPEN_STATUS:
-        # Toggle the status of the role
-        ROLE_OPEN_STATUS[role_name] = not ROLE_OPEN_STATUS[role_name]
-
-        flash(f"Role '{role_name}' status updated successfully!", 'success')
+def admin_toggle_status(role_id):
+    role = RoleStatus.query.get(role_id)
+    if role:
+        print(f"Toggling role: {role.role_name}, Current Status: {role.is_active}")
+        role.is_active = not role.is_active
+        db.session.commit()
+        flash(f"Role '{role.role_name}' status updated successfully!", 'success')
     else:
-        flash(f"Invalid role name: '{role_name}'", 'danger')
+        flash(f"No role found with ID: {role_id}", 'danger')
+    return redirect(url_for('admin_panel'))
 
-    return redirect(url_for('admin_panel') + '?refresh=true')
+
+# Route to remove a role
+@app.route('/remove_role/<int:role_id>', methods=['POST'])
+def remove_role(role_id):
+    # Find the role by its id
+    role = RoleStatus.query.get(role_id)
+    if role:
+        db.session.delete(role)  # Delete the role from the database
+        db.session.commit()
+        flash('Role removed successfully!', 'success')
+    else:
+        flash('Role not found!', 'danger')
+    
+    return redirect(url_for('admin_panel'))  # Redirect to role management page
+
 
 
 # Admin login route
