@@ -33,7 +33,6 @@ app.config['MAX_CONTENT_LENGTH'] = 2 * 1024 * 1024  # 2MB limit
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(seconds=20)
 # Secret key for session management (flash messages)
 app.secret_key = os.getenv('FLASK_SECRET_KEY', 'your_default_secret_key')
-# Initialize province_folder as None to handle state_province
 
 # Initialize the database
 db = SQLAlchemy(app)
@@ -74,13 +73,10 @@ class Applicants(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     role = db.Column(db.String(100), nullable=False)
-    country = db.Column(db.String(100), nullable=False)  # New field for country
-    state_province = db.Column(db.String(100), nullable=True)
     state = db.Column(db.String(100), nullable=False)
     lga = db.Column(db.String(100), nullable=False)
     ward = db.Column(db.String(100), nullable=False)
     name = db.Column(db.String(100), nullable=False)
-    city = db.Column(db.String(100), nullable=False)
     phone = db.Column(db.String(20), nullable=False)
     email = db.Column(db.String(120), nullable=False)
     address = db.Column(db.Text, nullable=False)
@@ -144,7 +140,7 @@ def generate_random_code(length=6):
     return random.randint(start, end)
 
 
-@app.route('/', methods=['GET', 'POST'])
+@app.route('/application-form', methods=['GET', 'POST'])
 def index():
     error_message = None
     role = None
@@ -167,6 +163,7 @@ def index():
     return render_template('index.html', error_message=error_message, role=role, active_roles=active_roles)
 
 
+
 # Route to handle form submission
 @app.route('/submit', methods=['POST'])
 def submit():
@@ -176,7 +173,7 @@ def submit():
     # Check if the form is open based on the access code and FORM_OPEN status
     valid_code = AccessCode.query.filter_by(code=access_code).first()
     if not valid_code or valid_code.expiration_date < datetime.now() or not FORM_OPEN:
-        flash("This application has closed or you have entered the wrong access code. Please double-check your access code or come back some other time.", "danger")
+        flash("This application has closed or you have entered wrong access code,  please double-check your access code or come back some other time.", "danger")
         return redirect(url_for('index'))
     
     # Check if the role is open in the database
@@ -191,11 +188,8 @@ def submit():
     email = request.form.get('email')
     address = request.form.get('address')
     country_code = request.form.get('countryCode')
-    state_province= request.form.get('state_province', None)  # Capture state/province field
     occupation = request.form.get('occupation')
-    country = request.form.get('country')  # Capture country field
-    state = request.form.get('state', None)
-    city = request.form.get('city')
+    state = request.form.get('state')
     lga = request.form.get('lga')
     ward = request.form.get('ward')
 
@@ -217,21 +211,16 @@ def submit():
 
     # Create folder structure
     role_folder = os.path.join(app.config['UPLOAD_FOLDER'], role)
-    state_or_state_province_folder = os.path.join(role_folder, state or state_province)  # Use state_province as folder
-    city_folder = os.path.join(state_or_state_province_folder, city)
-    applicant_folder = os.path.join(city_folder, name)
+    state_folder = os.path.join(role_folder, state)
+    applicant_folder = os.path.join(state_folder, name)
 
     # Check if the role folder exists, if not create it
     if not os.path.exists(role_folder):
         os.makedirs(role_folder)
 
-    # Check if the state/province folder exists, if not create it
-    if not os.path.exists(state_or_state_province_folder):
-        os.makedirs(state_or_state_province_folder)
-
-    # Ensure city_folder is created if it doesn't exist
-    if not os.path.exists(city_folder):
-        os.makedirs(city_folder)
+    # Check if the state folder exists, if not create it
+    if not os.path.exists(state_folder):
+        os.makedirs(state_folder)
 
     # Check if the applicant's folder exists, if not create it
     if not os.path.exists(applicant_folder):
@@ -254,10 +243,7 @@ def submit():
     # Create new applicant and save to the database
     new_applicant = Applicants(
         role=role,  # Added role/job field
-        country=country,  # Save country to the database
         state=state,
-        city=city,
-        state_province=state_province,
         lga=lga,
         ward=ward,
         name=name,
@@ -276,7 +262,6 @@ def submit():
     flash("Your application has been submitted successfully!", "success")
     # Redirect to the home page with success message
     return redirect(url_for('index', success=True))
-
 
 # Admin route to admin panel
 @app.route('/admin', methods=['GET', 'POST'])

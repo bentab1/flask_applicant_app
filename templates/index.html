@@ -5,16 +5,20 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Applicant Submission Form</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+ <!-- jQuerry -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+ 
 </head>
 <body>
   <div class="form-container">
     <h1>Applicant Submission Form</h1>
     <h3>Follow the Instructions, Please!!</h3>
-    <h5>Note: Please make sure you select the exact role/job advertised and follow all the job description instructions.</h5>
+    <h5 >Note: <br/>Please make sure you select the exact role/job advertised and follow all the job description instructions.</h5>
     <p>If you encounter any problems with the application, contact us at <a href="mailto:info@paycaretech.world">info@paycaretech.world</a>.</p>
     <p>You need to provide access code to be able to submit your application</p>
     <p>Good luck!</p>
-    <!-- Flash messages -->
+       <!-- Flash messages -->
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
         <ul>
@@ -24,74 +28,139 @@
         </ul>
       {% endif %}
     {% endwith %}
-
-    <!-- Hide form if application is successful or already applied -->
-    {% if not success and not already_applied %}
-    <form id="toggleStatusForm" action="{{ url_for('submit') }}" method="POST" enctype="multipart/form-data">
+     <!-- Hide form if application is successful or already applied -->
+     {% if not success and not already_applied %}
+    <form id="applicantForm" action="{{ url_for('submit') }}" method="POST" enctype="multipart/form-data">
       <label for="role">Select the role/job you are applying for:</label>
       <select id="role" name="role" required>
-          <option value="" disabled selected>Select role/job</option>
-          {% for role in active_roles %}
-              <option value="{{ role }}">{{ role }}</option>
-          {% endfor %}
+        <option value="" disabled selected>Select role/job</option>
+        {% for role in active_roles %}
+          <option value="{{ role }}">{{ role }}</option>
+        {% endfor %}
+      </select>
+      <div style="margin-bottom: 10px;">
+        <label for="country" style="font-weight: bold;">Country:</label>
+      </div>
+      <select id="country" name="country" required >
+        <option value="" disabled selected>Select your country</option>
+        <option value="Nigeria">Nigeria</option>
+        <option value="Ghana">Ghana</option>
+        <option value="Kenya">Kenya</option>
+        <option value="India">India</option>
+        <option value="Pakistan">Pakistan</option>
+        <option value="USA">USA</option>
+        <option value="UK">UK</option>
+        <option value="India">India</option>
+        <option value="Australia">Australia</option>
+        <!-- Add more countries as needed -->
       </select>
 
-      <label for="state">State:</label>
-      <select id="state" name="state" required>
-        <option value="" disabled selected>Select your state</option>
-        <!-- List of states -->
-        <option value="Abia">Abia</option>
-        <option value="Abuja">Abuja</option>
-        <option value="Adamawa">Adamawa</option>
-        <option value="Akwa Ibom">Akwa Ibom</option>
-        <option value="Anambra">Anambra</option>
-        <option value="Bauchi">Bauchi</option>
-        <option value="Bayelsa">Bayelsa</option>
-        <option value="Benue">Benue</option>
-        <option value="Borno">Borno</option>
-        <option value="Cross River">Cross River</option>
-        <option value="Delta">Delta</option>
-        <option value="Ebonyi">Ebonyi</option>
-        <option value="Edo">Edo</option>
-        <option value="Ekiti">Ekiti</option>
-        <option value="Enugu">Enugu</option>
-        <option value="Gombe">Gombe</option>
-        <option value="Imo">Imo</option>
-        <option value="Jigawa">Jigawa</option>
-        <option value="Kaduna">Kaduna</option>
-        <option value="Kano">Kano</option>
-        <option value="Katsina">Katsina</option>
-        <option value="Kebbi">Kebbi</option>
-        <option value="Kogi">Kogi</option>
-        <option value="Kwara">Kwara</option>
-        <option value="Lagos">Lagos</option>
-        <option value="Nasarawa">Nasarawa</option>
-        <option value="Niger">Niger</option>
-        <option value="Ogun">Ogun</option>
-        <option value="Ondo">Ondo</option>
-        <option value="Osun">Osun</option>
-        <option value="Oyo">Oyo</option>
-        <option value="Plateau">Plateau</option>
-        <option value="Rivers">Rivers</option>
-        <option value="Sokoto">Sokoto</option>
-        <option value="Taraba">Taraba</option>
-        <option value="Yobe">Yobe</option>
-        <option value="Zamfara">Zamfara</option>
-      </select>
+      <div id="nigeriaInputs">
+        <div style="margin: 20px 0;">
+          <!-- State -->
+          <div style="margin-bottom: 10px;">
+            <label for="state" style="font-weight: bold;">State:</label>
+          </div>
+          <div style="margin-bottom: 10px; font-size: 0.9em; color: #555;">
+            If you are applying for Sales representative, please select your actual state of residence because that is the state you will be covering:
+          </div>
+         
+        </div>
+        
+        <select id="state" name="state"  class="hidden">
+          <option value="" disabled selected>Select your state of residence</option>
+          <!-- Nigerian states -->
+          <option value="Abia">Abia</option>
+          <option value="Abuja">Abuja</option>
+          <option value="Adamawa">Adamawa</option>
+          <option value="Akwa Ibom">Akwa Ibom</option>
+          <option value="Anambra">Anambra</option>
+          <option value="Bauchi">Bauchi</option>
+          <option value="Bayelsa">Bayelsa</option>
+          <option value="Benue">Benue</option>
+          <option value="Borno">Borno</option>
+          <option value="Cross River">Cross River</option>
+          <option value="Delta">Delta</option>
+          <option value="Ebonyi">Ebonyi</option>
+          <option value="Edo">Edo</option>
+          <option value="Ekiti">Ekiti</option>
+          <option value="Enugu">Enugu</option>
+          <option value="Gombe">Gombe</option>
+          <option value="Imo">Imo</option>
+          <option value="Jigawa">Jigawa</option>
+          <option value="Kaduna">Kaduna</option>
+          <option value="Kano">Kano</option>
+          <option value="Katsina">Katsina</option>
+          <option value="Kebbi">Kebbi</option>
+          <option value="Kogi">Kogi</option>
+          <option value="Kwara">Kwara</option>
+          <option value="Lagos">Lagos</option>
+          <option value="Nasarawa">Nasarawa</option>
+          <option value="Niger">Niger</option>
+          <option value="Ogun">Ogun</option>
+          <option value="Ondo">Ondo</option>
+          <option value="Osun">Osun</option>
+          <option value="Oyo">Oyo</option>
+          <option value="Plateau">Plateau</option>
+          <option value="Rivers">Rivers</option>
+          <option value="Sokoto">Sokoto</option>
+          <option value="Taraba">Taraba</option>
+          <option value="Yobe">Yobe</option>
+          <option value="Zamfara">Zamfara</option>
+          <!-- Add other states -->
+        </select>
+        <div style="margin: 20px 0;">
+          <!-- Local Government Area -->
+          <div style="margin-bottom: 10px;">
+            <label for="lga" style="font-weight: bold;">Local Government Area (LGA):</label>
+          </div>
+          <div style="margin-bottom: 10px; font-size: 0.9em; color: #555;">
+            If you are applying for Aggregator or Agent role, please provide your actual Local Government Area of residence because that is the region you will be covering:
+          </div>
+          <input 
+            type="text" 
+            id="lga" 
+            name="lga" 
+            class="hidden"
+            placeholder="Enter LGA of residence" 
+            style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; margin-bottom: 20px;"
+          >
+        
+          <!-- Council Ward -->
+          <div style="margin-bottom: 10px;">
+            <label for="ward" style="font-weight: bold;">Your Council Ward:</label>
+          </div>
+          <div style="margin-bottom: 10px; font-size: 0.9em; color: #555;">
+            If you are applying for Agent role, please provide your actual council ward of residence because that is where you will be covering:
+          </div>
+          <input 
+            type="text" 
+            id="ward" 
+            name="ward" 
+            class="hidden"
+            placeholder="Enter Council Ward of residence" 
+            style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;"
+          >
+        </div>
+      </div>
 
-      <label for="lga">Local Government Area (LGA):</label>
-      <input type="text" id="lga" name="lga" placeholder="Enter LGA" required>
-
-      <label for="ward">Your Council Ward:</label>
-      <input type="text" id="ward" name="ward" placeholder="Enter Council Ward" required>
-
+      <div id="otherCountryInputs" style="display: none;">
+        <label for="state">State/Province:</label>
+        <input type="text" id="state_province" name="state_province" class="hidden" placeholder="Enter State/Province">
+        <br><br>
+      </div>
+      <label for="city">City:</label>
+      <input type="text" id="city" name="city" placeholder="Enter your city" required>
       <label for="name">Full Name:</label>
       <input type="text" id="name" name="name" placeholder="Enter full name" required>
-
+   
       <div class="phone-container">
         <label for="phone">Phone Number:</label>
         <select id="countryCode" name="countryCode" required>
           <option value="+234">+234 (Nigeria)</option>
+          <option value="+233">+233 (Ghana)</option>
+          <option value="+254">+254 (Kenya)</option>
+          <option value="+92">+92 (Pakistan)</option>          
           <option value="+1">+1 (USA)</option>
           <option value="+44">+44 (UK)</option>
           <option value="+91">+91 (India)</option>
@@ -112,8 +181,9 @@
           <option value="+31">+31 (Netherlands)</option>
           <option value="+81">+81 (Japan)</option>
           <option value="+47">+47 (Norway)</option>
+          <!-- Add more countries as needed -->
         </select>
-        <input type="tel" id="phone" name="phone" placeholder="Enter the rest 10-digit of your phone number. eg. 8160052390" pattern="[0-9]{10}" required title="Please enter exactly 11 digits" maxlength="11">
+        <input type="tel" id="phone" name="phone" placeholder="Enter the rest 10-digit of your phone number. eg. 8160052390" pattern="[0-9]{10}" required title="Please enter exactly 11 digits" maxlength="10">
       </div>
 
       <label for="email">Email Address:</label>
@@ -135,7 +205,7 @@
       <!-- Access Code Input -->
       <label for="accesscode">Enter Access Code:</label>
       <input type="text" id="accesscode" name="accesscode" placeholder="Enter access code" required>
-
+      <label style="color: rgb(29, 11, 164);font-weight: bold;">If you are shortlisted, you will recive and email from us by Febuary 20th 2025 about your application update. You can also contact after this date, if you don't hear from us :</label>
       <button type="submit">Submit</button>
     </form>
     {% endif %}
@@ -148,21 +218,80 @@
     {% endif %}
   </div>
 
+  
   <script>
-    // Wait for the DOM to fully load before executing the script
-    document.addEventListener('DOMContentLoaded', function() {
-        const roleSelect = document.getElementById('role');
-
-        roleSelect.addEventListener('change', function() {
-            // Get the selected role ID
-            const selectedRoleId = roleSelect.value;
-            
-            // Set the action dynamically to include the role_id
-            if (selectedRoleId) {
-                form.action = `/admin/toggle_status/${selectedRoleId}`;
-            }
-        });
+    document.addEventListener('DOMContentLoaded', function () {
+      const countrySelect = document.getElementById('country');
+      const nigeriaInputs = document.getElementById('nigeriaInputs');
+      const otherCountryInputs = document.getElementById('otherCountryInputs');
+      
+      // Toggle visibility based on selected country
+      function toggleInputs() {
+        if (countrySelect.value === 'Nigeria') {
+          nigeriaInputs.style.display = 'block';
+          otherCountryInputs.style.display = 'none';
+        } else {
+          nigeriaInputs.style.display = 'none';
+          otherCountryInputs.style.display = 'block';
+        }
+      }
+  
+      // Event listener to handle country selection changes
+      countrySelect.addEventListener('change', toggleInputs);
+  
+      // Initial check to set visibility when the page loads (if a value is already selected)
+      toggleInputs();
     });
+
+    $(document).ready(function () {
+  const stateField = $('#state');
+  const stateProvinceField = $('#state_province');
+  const lgaField = $('#lga');
+  const wardField = $('#ward');
+  const stateProvinceLabel = $('#stateProvinceLabel');
+  const lgaLabel = $('#lgaLabel');
+  const wardLabel = $('#wardLabel');
+
+  // Function to update field visibility and requirement
+  function updateFieldVisibility() {
+    if (!stateField.prop('disabled') && stateField.is(':visible')) {
+      // If state field is visible, enabled, and required
+      // Make LGA and Ward required
+      lgaField.attr('required', true).prop('disabled', false);
+      wardField.attr('required', true).prop('disabled', false);
+
+      lgaLabel.removeClass('hidden');
+      wardLabel.removeClass('hidden');
+      stateProvinceLabel.addClass('hidden');
+
+      // Hide stateProvince field
+      stateProvinceField.addClass('hidden').attr('required', false).prop('disabled', true);
+    } else {
+      // If state field is not visible or disabled
+      // Make LGA and Ward optional
+      lgaField.attr('required', false).prop('disabled', false);
+      wardField.attr('required', false).prop('disabled', false);
+
+      lgaLabel.removeClass('hidden');
+      wardLabel.removeClass('hidden');
+      stateProvinceLabel.removeClass('hidden');
+
+      // Show stateProvince field
+      stateProvinceField.removeClass('hidden').attr('required', true).prop('disabled', false);
+    }
+  }
+
+  // Initialize field visibility based on the initial state value
+  updateFieldVisibility();
+
+  // Update visibility when the state field changes
+  stateField.change(function () {
+    updateFieldVisibility();
+  });
+});
+
+
   </script>
+  
 </body>
 </html>
