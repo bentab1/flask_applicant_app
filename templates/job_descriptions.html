@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Job Descriptions</title>
+    <style>
+        /* Reset default browser margin and padding */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+            margin: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #1d0bac;
+            margin-bottom: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        label {
+            color: rgb(29, 11, 164);
+            font-weight: bold;
+            font-size: 18px;
+            display: block;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        table {
+            width: 100%;
+            margin-top: 20px;
+            border-collapse: collapse;
+            background-color: #fff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        td a {
+            text-decoration: none;
+            color: #1d0bac;
+            font-weight: bold;
+        }
+
+        td a:hover {
+            color: #4CAF50;
+        }
+
+        .description {
+            font-size: 14px;
+            color: #555;
+        }
+
+        /* Responsive styling for smaller screens */
+        @media screen and (max-width: 768px) {
+            table, th, td {
+                font-size: 14px;
+            }
+
+            label {
+                font-size: 16px;
+            }
+        }
+
+        @media screen and (max-width: 480px) {
+            label {
+                font-size: 14px;
+            }
+
+            h1 {
+                font-size: 22px;
+            }
+
+            table {
+                font-size: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container" style="background-color: beige;">
+        <a href="{{ url_for('index') }}" style="text-decoration: none; display: inline-flex; align-items: center; margin-bottom: 30px;">
+            <span style="font-size: 30px; margin-right: 5px;">&#8592;</span> 
+            <span style="font-size: 13px; font-weight: bold;">Back</span>
+        </a>
+        
+        <h1>Available Job and Their Descriptions</h1>
+        <label>
+            Note: Please do not apply for the job/role if you do not have the skills and experience; otherwise, your application will not be considered.
+        </label>
+        <table>
+            <thead>
+                <tr>
+                    <th>S/N</th>
+                    <th>Job Title</th>
+                    <th>Description</th>
+                    <th>View</th>
+                    <th>Download</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for file in files %}
+                <tr>
+                    <td>{{ loop.index }}</td>
+                    <td>{{ file.file_type_name }}</td>
+                    <td class="description">{{ file.file_description }}</td>
+                    <td>
+                        <a href=" {{ url_for('download_file', filename=file.filename) }}" target="_blank">View</a>
+                    </td>
+                    <td>
+                        <a href="{{ url_for('download_file', filename=file.filename) }}" download>Download</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        
+    </div>
+    
+</body>
+</html>

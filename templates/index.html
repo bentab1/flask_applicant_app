@@ -14,9 +14,10 @@
   <div class="form-container">
     <h1>Applicant Submission Form</h1>
     <h3>Follow the Instructions, Please!!</h3>
-    <h5 >Note: <br/>Please make sure you select the exact role/job advertised and follow all the job description instructions.</h5>
+    <h5 >Note: <br/>Please make sure you select the exact Role/Job as advertised and apply for the one that matches your skils and  experience. Follow all the job description instructions.</h5>
     <p>If you encounter any problems with the application, contact us at <a href="mailto:info@paycaretech.world">info@paycaretech.world</a>.</p>
     <p>You need to provide access code to be able to submit your application</p>
+
     <p>Good luck!</p>
        <!-- Flash messages -->
     {% with messages = get_flashed_messages(with_categories=true) %}
@@ -28,6 +29,20 @@
         </ul>
       {% endif %}
     {% endwith %}
+
+
+
+    <h2>Please check the Job Portal below, come back and apply</h2>
+    <p>
+        <strong>Note:</strong></br> Click on the green button below to check, read, and explore the job descriptions for all available jobs/roles. After reviewing, return and apply for the one that matches your skills and experience.
+        Please do not apply for any job for which you do not have the required skills and experience, as your application will not be considered.</br> You are only allowed to apply for one role</br>
+        Thank you!
+    </p>
+   <a href="{{ url_for('job_descriptions') }}">
+    <button style="margin-bottom: 30px;">Click here to view Jobs Descriptions ></button>
+   </a>
+
+
      <!-- Hide form if application is successful or already applied -->
      {% if not success and not already_applied %}
     <form id="applicantForm" action="{{ url_for('submit') }}" method="POST" enctype="multipart/form-data">
@@ -54,7 +69,7 @@
         <option value="Australia">Australia</option>
         <!-- Add more countries as needed -->
       </select>
-
+      
       <div id="nigeriaInputs">
         <div style="margin: 20px 0;">
           <!-- State -->
@@ -201,12 +216,25 @@
       <label for="coverLetter">Upload Cover Letter (Accepted formats: .pdf, .doc, .docx, Max size: 2MB):</label>
       <input type="file" id="coverLetter" name="coverLetter" accept=".pdf,.doc,.docx" required>
 
+      <!-- Salary Expectation -->
+      <div style="margin-top: 20px;">
+        <label for="salary" style="font-weight: bold;">Salary Expectation:</label>
+        <div style="margin-bottom: 10px; font-size: 0.9em; color: #555;">
+          Please provide your salary expectation per annum. <strong>Note:</strong> Agents and Aggregators are excluded.
+        </div>
+        <div style="display: flex; align-items: center;">
+          <span style="font-size: 1.2em; font-weight: bold; margin-right: 5px;">₦</span>
+          <input type="text" id="salary" name="salary_expectation" placeholder="Enter your salary expectation" required min="0" step="500" style="font-size: 1.2em;">
+        </div>
+      </div>
+
+
+
 
       <!-- Access Code Input -->
-      <label for="accesscode">Enter Access Code:</label>
+      <label for="accesscode" style="font-weight: bold;margin-top: 30px;">Enter Access Code:</label>
       <input type="text" id="accesscode" name="accesscode" placeholder="Enter access code" required>
-      <label style="color: rgb(29, 11, 164);font-weight: bold;">If you are shortlisted, 
-      you will receive an email from us by Febuary 20th 2025 about your application update. You can also contact us after this date, if you don't hear from us :</label>
+      <label style="color: rgb(29, 11, 164);font-weight: bold;">If you are shortlisted, you will recive email from us in few weeks about your application update.</br> Good luck !!</label>
       <button type="submit">Submit</button>
     </form>
     {% endif %}

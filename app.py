@@ -3,6 +3,10 @@ from flask_sqlalchemy import SQLAlchemy
 from dotenv import load_dotenv
 import os
 import pytz
+from flask import send_from_directory, current_app
+from flask_wtf import FlaskForm
+from wtforms import FileField, StringField, TextAreaField, SubmitField
+from wtforms.validators import DataRequired
 from werkzeug.utils import secure_filename
 from flask_migrate import Migrate
 from werkzeug.exceptions import RequestEntityTooLarge
@@ -10,6 +14,7 @@ from functools import wraps
 from datetime import datetime, timedelta
 import random
 import string
+import re
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -28,8 +33,14 @@ app.config['ALLOWED_EXTENSIONS'] = {'pdf', 'doc', 'docx'}
 
 # Set maximum content length (2MB)
 app.config['MAX_CONTENT_LENGTH'] = 2 * 1024 * 1024  # 2MB limit
-# Set session lifetime (optional, ensures consistency)
 
+# Configure your upload folder
+app.config['UPLOAD_FOLDER'] = 'static/job_description_files'  # Update this path to where you want to store the uploaded files
+app.config['ALLOWED_EXTENSIONS'] = {'pdf'}  # Only allow PDF files
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB limit for file uploads
+
+
+# Set session lifetime (optional, ensures consistency)
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(seconds=20)
 # Secret key for session management (flash messages)
 app.secret_key = os.getenv('FLASK_SECRET_KEY', 'your_default_secret_key')
@@ -45,6 +56,24 @@ nigerian_tz = pytz.timezone('Africa/Lagos')
 
 # Default status values (These can be updated by admin in the backend)
 FORM_OPEN = True  # True if form is open, False if closed
+
+
+# Define the form
+class FileUploadForm(FlaskForm):
+    file = FileField('Upload File', validators=[DataRequired()])
+    file_type_name = StringField('File Type Name', validators=[DataRequired()])
+    file_description = TextAreaField('File Description', validators=[DataRequired()])
+    submit = SubmitField('Upload')
+
+
+class File(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    file_type_name = db.Column(db.String(100), nullable=False)  # Name of the file type
+    file_description = db.Column(db.Text, nullable=False)  # Description of the file
+    filename = db.Column(db.String(200), nullable=False)  # Actual file path/name
+    uploaded_at = db.Column(db.DateTime, default=datetime.utcnow)  # Timestamp for upload
+
+
 class RoleStatus(db.Model):
     __tablename__ = 'role_status'
 
@@ -84,6 +113,7 @@ class Applicants(db.Model):
     phone = db.Column(db.String(20), nullable=False)
     email = db.Column(db.String(120), nullable=False)
     address = db.Column(db.Text, nullable=False)
+    salary_expectation = db.Column(db.Text, nullable=False)  # if you need it to store strings like "$50,000"
     occupation = db.Column(db.String(100), nullable=False)
     cv_file = db.Column(db.String(200), nullable=False)
     cover_letter_file = db.Column(db.String(200), nullable=False)
@@ -93,6 +123,10 @@ class Applicants(db.Model):
     def __repr__(self):
         return f'<Applicants {self.name}>'
 
+
+# Helper function to check allowed file extension
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
 
 # Helper function to check allowed file types
 def allowed_file(filename):
@@ -167,6 +201,14 @@ def index():
     return render_template('index.html', error_message=error_message, role=role, active_roles=active_roles)
 
 
+      #to route the job description
+@app.route('/job-descriptions')
+def job_descriptions():
+    # Fetch all uploaded files from the database
+    files = File.query.all()
+    return render_template('job_descriptions.html', files=files)
+
+
 # Route to handle form submission
 @app.route('/submit', methods=['POST'])
 def submit():
@@ -184,6 +226,7 @@ def submit():
     if not role_status or not role_status.is_active:
         flash("This role is closed, please check back some other time.", "danger")
         return redirect(url_for('index'))
+   
 
     # Collect other form data
     name = request.form.get('name')
@@ -193,6 +236,7 @@ def submit():
     country_code = request.form.get('countryCode')
     state_province= request.form.get('state_province', None)  # Capture state/province field
     occupation = request.form.get('occupation')
+    salary_expectation = request.form.get('salary_expectation',None)
     country = request.form.get('country')  # Capture country field
     state = request.form.get('state', None)
     city = request.form.get('city')
@@ -250,7 +294,15 @@ def submit():
     if existing_applicant:
         flash("You have already applied for this role! Thank you!.", "danger")
         return redirect(url_for('index', already_applied=True))
+        
+        # Clean the salary input by removing non-numeric characters
+    salary_expectation = re.sub(r'[^\d.]', '', salary_expectation)
 
+    # Try to convert the salary to a float, default to 0.0 if conversion fails
+    try:
+        salary_expectation = float(salary_expectation)
+    except ValueError:
+        salary_expectation = 0.0  # In case the value is not a valid number
     # Create new applicant and save to the database
     new_applicant = Applicants(
         role=role,  # Added role/job field
@@ -265,6 +317,7 @@ def submit():
         email=email,
         address=address,
         occupation=occupation,
+        salary_expectation=salary_expectation,
         cv_file=cv_path,
         cover_letter_file=cover_letter_path
     )
@@ -276,43 +329,123 @@ def submit():
     flash("Your application has been submitted successfully!", "success")
     # Redirect to the home page with success message
     return redirect(url_for('index', success=True))
-
-
-# Admin route to admin panel
+    
+# Your existing route for the admin panel
 @app.route('/admin', methods=['GET', 'POST'])
 @admin_required  # Assuming you have an admin_required decorator to protect the admin panel
 def admin_panel():
     FORM_OPEN = 'form_open' in request.form
 
     if request.method == 'POST':
+        # Handle file upload if a file is submitted
+        if 'file' in request.files:
+            file = request.files.get('file')
+            file_type_name = request.form.get('file_type_name', 'Untitled')
+            file_description = request.form.get('file_description', '')
+
+            if file and file_type_name and file_description:
+                # Check if the file is a PDF
+                if not file.filename.endswith('.pdf'):
+                    flash('Invalid file type! Please upload a PDF file.', 'danger')
+                   
+
+                # Check if a file with the same name or description already exists
+                existing_file = File.query.filter(
+                    (File.file_type_name == file_type_name)
+                ).first()
+
+                if existing_file:
+                    # Render error message if a duplicate is found
+                    flash('This file has already been uploaded. Please choose another file.', 'danger')
+                else:
+                    # Create a unique path for storing the job description file
+                    job_desc_folder = os.path.join(app.config['UPLOAD_FOLDER'], 'job_descriptions')
+                    if not os.path.exists(job_desc_folder):
+                        os.makedirs(job_desc_folder)
+
+                    filename = secure_filename(file.filename)
+                    file_path = os.path.join(job_desc_folder, filename)
+                    file.save(file_path)
+
+                    # Save metadata to the database
+                    new_file = File(
+                        file_type_name=file_type_name,
+                        file_description=file_description,
+                        filename=filename
+                    )
+                    db.session.add(new_file)
+                    db.session.commit()
+                    flash('File uploaded successfully!', 'success')
+            else:
+                flash('Please provide a file, file type name, and description.', 'danger')
+
         # Update role statuses in the database
         for role in request.form:
-            if role != 'form_open':  # Skip form_open field
-                # Check if the role exists in the database
+            if role != 'form_open' and role not in ['file_type_name', 'file_description', 'file']:  # Skip irrelevant fields
                 role_status = RoleStatus.query.filter_by(role_name=role).first()
 
                 if role_status:
-                    # Toggle the status: set it to True if role is in the form (checked), False otherwise
-                    role_status.is_active = True if role in request.form else False
+                    # Toggle the status
+                    role_status.is_active = role in request.form
                 else:
-                    # If the role does not exist in the database, create a new role and set its active status based on the form
-                    new_role_status = RoleStatus(role_name=role, is_active=True if role in request.form else False)
+                    # Create new role if it doesn't exist
+                    new_role_status = RoleStatus(role_name=role, is_active=(role in request.form))
                     db.session.add(new_role_status)
 
-        # Commit all changes to the database after the loop
+        # Commit all changes to the database
         db.session.commit()
-
-        # Flash a success message
         flash('Settings updated successfully!', 'success')
 
-        # Redirect to the admin panel
+        # Redirect to avoid form resubmission
         return redirect(url_for('admin_panel'))
 
-    # Fetch all roles from the database, sorted by role_name (or any other column you prefer)
-    roles = RoleStatus.query.order_by(RoleStatus.role_name).all()  # Sorted by role_name
+    # Fetch all roles and access codes for display
+    roles = RoleStatus.query.order_by(RoleStatus.role_name).all()
     all_codes = AccessCode.query.order_by(AccessCode.created_at.desc()).limit(2).all()
 
-    return render_template('admin_panel.html', form_open=FORM_OPEN, roles=roles, all_codes=all_codes)
+    # Fetch all uploaded files for display
+    files = File.query.all()
+
+    return render_template('admin_panel.html', form_open=FORM_OPEN, roles=roles, all_codes=all_codes, files=files)
+
+
+# Define the download_file route here
+@app.route('/uploads/<filename>')
+def download_file(filename):
+    # Define the folder where your job description files are stored
+    job_desc_folder = os.path.join(current_app.config['UPLOAD_FOLDER'], 'job_descriptions')
+
+    # Ensure the file exists before serving it
+    try:
+        return send_from_directory(job_desc_folder, filename)
+    except FileNotFoundError:
+        flash("File not found.", "danger")
+        return redirect(url_for('admin_panel'))
+    
+    
+    #Define delete route
+@app.route('/delete_file/<int:file_id>', methods=['POST'])
+def delete_file(file_id):
+    # Get the file from the database by ID
+    file_to_delete = File.query.get(file_id)
+
+    if file_to_delete:
+        # Delete the file from the file system
+        job_desc_folder = os.path.join(current_app.config['UPLOAD_FOLDER'], 'job_descriptions')
+        file_path = os.path.join(job_desc_folder, file_to_delete.filename)
+
+        try:
+            os.remove(file_path)  # Remove the file from the server
+            db.session.delete(file_to_delete)  # Remove the file entry from the database
+            db.session.commit()
+            flash('File deleted successfully!', 'success')
+        except FileNotFoundError:
+            flash('File not found on the server.', 'danger')
+            return redirect(url_for('admin_panel'))
+    else:
+        flash('File not found in the database.', 'danger')
+
+    return redirect(url_for('admin_panel'))
 
 
 
@@ -435,7 +568,7 @@ def check_session_timeout():
         # Ensure both datetimes are naive or aware
         now = datetime.now().astimezone(last_activity.tzinfo) if last_activity.tzinfo else datetime.now()
 
-        if (now - last_activity).total_seconds() > 30:  # 15 seconds timeout
+        if (now - last_activity).total_seconds() > 120:  # 15 seconds timeout
             session.clear()  # Clear the entire session to avoid residual data
             flash("Session timed out due to inactivity. Please log in again.", "danger")
             return redirect(url_for('login'))  # Redirect to login page
