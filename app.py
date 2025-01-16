@@ -6,6 +6,7 @@ import pytz
 from flask import send_from_directory, current_app
 from flask_wtf import FlaskForm
 from wtforms import FileField, StringField, TextAreaField, SubmitField
+from wtforms.validators import DataRequired, Length
 from wtforms.validators import DataRequired
 from werkzeug.utils import secure_filename
 from flask_migrate import Migrate
@@ -57,12 +58,26 @@ nigerian_tz = pytz.timezone('Africa/Lagos')
 # Default status values (These can be updated by admin in the backend)
 FORM_OPEN = True  # True if form is open, False if closed
 
-
-# Define the form
 class FileUploadForm(FlaskForm):
     file = FileField('Upload File', validators=[DataRequired()])
-    file_type_name = StringField('File Type Name', validators=[DataRequired()])
-    file_description = StringField('File Description', validators=[DataRequired()])
+    
+    # Allow file_type_name to accept up to 255 characters, including spaces
+    file_type_name = StringField(
+        'File Type Name',
+        validators=[
+            DataRequired(message="File type name is required."),
+            Length(max=255, message="File type name cannot exceed 255 characters.")
+        ]
+    )
+    
+    # Allow file_description to accept up to 400 characters, including spaces
+    file_description = TextAreaField(
+        'File Description',
+        validators=[
+            DataRequired(message="File description is required."),
+            Length(max=400, message="Description must be 400 characters or less.")
+        ]
+    )
     submit = SubmitField('Upload')
 
 
@@ -413,7 +428,7 @@ def admin_panel():
 @app.route('/uploads/<filename>')
 def download_file(filename):
     # Define the folder where your job description files are stored
-    job_desc_folder = os.path.join(current_app.config['UPLOAD_FOLDER'], 'job_descriptions')
+    job_desc_folder = os.path.join(current_app.config['UPLOAD_FOLDER'], 'job_description')
 
     # Ensure the file exists before serving it
     try:
