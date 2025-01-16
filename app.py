@@ -62,14 +62,14 @@ FORM_OPEN = True  # True if form is open, False if closed
 class FileUploadForm(FlaskForm):
     file = FileField('Upload File', validators=[DataRequired()])
     file_type_name = StringField('File Type Name', validators=[DataRequired()])
-    file_description = TextAreaField('File Description', validators=[DataRequired()])
+    file_description = StringField('File Description', validators=[DataRequired()])
     submit = SubmitField('Upload')
 
 
 class File(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     file_type_name = db.Column(db.String(100), nullable=False)  # Name of the file type
-    file_description = db.Column(db.Text, nullable=False)  # Description of the file
+    file_description = db.Column(db.String(400), nullable=False)  # Description of the file, up to 400 characters
     filename = db.Column(db.String(200), nullable=False)  # Actual file path/name
     uploaded_at = db.Column(db.DateTime, default=datetime.utcnow)  # Timestamp for upload
 
@@ -568,7 +568,7 @@ def check_session_timeout():
         # Ensure both datetimes are naive or aware
         now = datetime.now().astimezone(last_activity.tzinfo) if last_activity.tzinfo else datetime.now()
 
-        if (now - last_activity).total_seconds() > 120:  # 15 seconds timeout
+        if (now - last_activity).total_seconds() > 1000:  # 15 seconds timeout
             session.clear()  # Clear the entire session to avoid residual data
             flash("Session timed out due to inactivity. Please log in again.", "danger")
             return redirect(url_for('login'))  # Redirect to login page

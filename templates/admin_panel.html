@@ -61,22 +61,21 @@
         </table>
       </section>
     {% endif %}
-
     <form method="POST" enctype="multipart/form-data">
       <!-- CSRF token included here -->
-  
+    
       <label for="file">Upload File:</label>
       <input type="file" name="file" id="file" required><br>
-  
+    
       <label for="file_type_name">File Type Name:</label>
       <input type="text" name="file_type_name" id="file_type_name" required><br>
-  
-      <label for="file_description">File Description:</label>
-      <textarea name="file_description" id="file_description" required></textarea><br>
-  
+    
+      <label for="file_description">File Description (up to 400 characters):</label>
+      <textarea name="file_description" id="file_description" required style="word-wrap: break-word; white-space: normal; width: 100%; max-width: 100%;"></textarea><br>
+    
       <button type="submit">Upload</button>
-  </form>
-  
+    </form>
+    
  <!-- file upload and delete -->
  <h2>Uploaded Files</h2>
  <table border="1">
