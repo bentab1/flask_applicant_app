@@ -6,7 +6,6 @@ import pytz
 from flask import send_from_directory, current_app
 from flask_wtf import FlaskForm
 from wtforms import FileField, StringField, TextAreaField, SubmitField
-from wtforms.validators import DataRequired, Length
 from wtforms.validators import DataRequired
 from werkzeug.utils import secure_filename
 from flask_migrate import Migrate
@@ -58,33 +57,19 @@ nigerian_tz = pytz.timezone('Africa/Lagos')
 # Default status values (These can be updated by admin in the backend)
 FORM_OPEN = True  # True if form is open, False if closed
 
+
+# Define the form
 class FileUploadForm(FlaskForm):
     file = FileField('Upload File', validators=[DataRequired()])
-    
-    # Allow file_type_name to accept up to 255 characters, including spaces
-    file_type_name = StringField(
-        'File Type Name',
-        validators=[
-            DataRequired(message="File type name is required."),
-            Length(max=255, message="File type name cannot exceed 255 characters.")
-        ]
-    )
-    
-    # Allow file_description to accept up to 400 characters, including spaces
-    file_description = TextAreaField(
-        'File Description',
-        validators=[
-            DataRequired(message="File description is required."),
-            Length(max=400, message="Description must be 400 characters or less.")
-        ]
-    )
+    file_type_name = StringField('File Type Name', validators=[DataRequired()])
+    file_description = TextAreaField('File Description', validators=[DataRequired()])
     submit = SubmitField('Upload')
 
 
 class File(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     file_type_name = db.Column(db.String(100), nullable=False)  # Name of the file type
-    file_description = db.Column(db.String(400), nullable=False)  # Description of the file, up to 400 characters
+    file_description = db.Column(db.Text, nullable=False)  # Description of the file
     filename = db.Column(db.String(200), nullable=False)  # Actual file path/name
     uploaded_at = db.Column(db.DateTime, default=datetime.utcnow)  # Timestamp for upload
 
@@ -193,7 +178,7 @@ def generate_random_code(length=6):
     return random.randint(start, end)
 
 
-@app.route('/application-form', methods=['GET', 'POST'])
+@app.route('/applicantion-form', methods=['GET', 'POST'])
 def index():
     error_message = None
     role = None
@@ -345,92 +330,70 @@ def submit():
     # Redirect to the home page with success message
     return redirect(url_for('index', success=True))
     
-# Your existing route for the admin panel
 @app.route('/admin', methods=['GET', 'POST'])
-@admin_required  # Assuming you have an admin_required decorator to protect the admin panel
+@admin_required
 def admin_panel():
     FORM_OPEN = 'form_open' in request.form
 
     if request.method == 'POST':
-        # Handle file upload if a file is submitted
         if 'file' in request.files:
             file = request.files.get('file')
-            file_type_name = request.form.get('file_type_name', 'Untitled')
-            file_description = request.form.get('file_description', '')
+            file_type_name = request.form.get('file_type_name', 'Untitled').strip()
+            file_description = request.form.get('file_description', '').strip()
 
             if file and file_type_name and file_description:
-                # Check if the file is a PDF
                 if not file.filename.endswith('.pdf'):
                     flash('Invalid file type! Please upload a PDF file.', 'danger')
-                   
-
-                # Check if a file with the same name or description already exists
-                existing_file = File.query.filter(
-                    (File.file_type_name == file_type_name)
-                ).first()
-
-                if existing_file:
-                    # Render error message if a duplicate is found
-                    flash('This file has already been uploaded. Please choose another file.', 'danger')
                 else:
-                    # Create a unique path for storing the job description file
-                    job_desc_folder = os.path.join(app.config['UPLOAD_FOLDER'], 'job_descriptions')
-                    if not os.path.exists(job_desc_folder):
-                        os.makedirs(job_desc_folder)
+                    existing_file = File.query.filter_by(file_type_name=file_type_name).first()
+                    if existing_file:
+                        flash('This file type has already been uploaded. Please choose another.', 'danger')
+                    else:
+                        # Directory structure: job_descriptions//file_type_name//filename
+                        job_desc_folder = os.path.join(
+                            app.config['UPLOAD_FOLDER'], 'job_descriptions', file_type_name
+                        )
+                        os.makedirs(job_desc_folder, exist_ok=True)
 
-                    filename = secure_filename(file.filename)
-                    file_path = os.path.join(job_desc_folder, filename)
-                    file.save(file_path)
+                        filename = secure_filename(file.filename)
+                        file_path = os.path.join(job_desc_folder, filename)
+                        file.save(file_path)
 
-                    # Save metadata to the database
-                    new_file = File(
-                        file_type_name=file_type_name,
-                        file_description=file_description,
-                        filename=filename
-                    )
-                    db.session.add(new_file)
-                    db.session.commit()
-                    flash('File uploaded successfully!', 'success')
+                        # Save metadata to the database
+                        new_file = File(
+                            file_type_name=file_type_name,
+                            file_description=file_description,
+                            filename=filename
+                        )
+                        db.session.add(new_file)
+                        db.session.commit()
+                        flash('File uploaded successfully!', 'success')
             else:
                 flash('Please provide a file, file type name, and description.', 'danger')
 
-        # Update role statuses in the database
         for role in request.form:
-            if role != 'form_open' and role not in ['file_type_name', 'file_description', 'file']:  # Skip irrelevant fields
+            if role not in {'form_open', 'file_type_name', 'file_description', 'file'}:
                 role_status = RoleStatus.query.filter_by(role_name=role).first()
-
                 if role_status:
-                    # Toggle the status
                     role_status.is_active = role in request.form
                 else:
-                    # Create new role if it doesn't exist
                     new_role_status = RoleStatus(role_name=role, is_active=(role in request.form))
                     db.session.add(new_role_status)
 
-        # Commit all changes to the database
         db.session.commit()
         flash('Settings updated successfully!', 'success')
-
-        # Redirect to avoid form resubmission
         return redirect(url_for('admin_panel'))
 
-    # Fetch all roles and access codes for display
     roles = RoleStatus.query.order_by(RoleStatus.role_name).all()
     all_codes = AccessCode.query.order_by(AccessCode.created_at.desc()).limit(2).all()
-
-    # Fetch all uploaded files for display
     files = File.query.all()
 
     return render_template('admin_panel.html', form_open=FORM_OPEN, roles=roles, all_codes=all_codes, files=files)
 
-
-# Define the download_file route here
-@app.route('/uploads/<filename>')
-def download_file(filename):
-    # Define the folder where your job description files are stored
-    job_desc_folder = os.path.join(current_app.config['UPLOAD_FOLDER'], 'job_description')
-
-    # Ensure the file exists before serving it
+@app.route('/uploads/<file_type_name>/<filename>')
+def download_file(file_type_name, filename):
+    # Directory structure: job_descriptions//file_type_name//filename
+    job_desc_folder = os.path.join(current_app.config['UPLOAD_FOLDER'], 'job_descriptions', file_type_name)
     try:
         return send_from_directory(job_desc_folder, filename)
     except FileNotFoundError:
@@ -583,7 +546,7 @@ def check_session_timeout():
         # Ensure both datetimes are naive or aware
         now = datetime.now().astimezone(last_activity.tzinfo) if last_activity.tzinfo else datetime.now()
 
-        if (now - last_activity).total_seconds() > 1000:  # 15 seconds timeout
+        if (now - last_activity).total_seconds() > 120:  # 15 seconds timeout
             session.clear()  # Clear the entire session to avoid residual data
             flash("Session timed out due to inactivity. Please log in again.", "danger")
             return redirect(url_for('login'))  # Redirect to login page

@@ -127,10 +127,11 @@
                     <td>{{ file.file_type_name }}</td>
                     <td class="description">{{ file.file_description }}</td>
                     <td>
-                        <a href=" {{ url_for('download_file', filename=file.filename) }}" target="_blank">View</a>
+                        <a href=" {{ url_for('download_file', file_type_name=file.file_type_name, filename=file.filename) }}" target="_blank">View</a>
                     </td>
                     <td>
-                        <a href="{{ url_for('download_file', filename=file.filename) }}" download>Download</a>
+                        <a href="{{ url_for('download_file', file_type_name=file.file_type_name, filename=file.filename) }}" download="">Download</a>
+
                     </td>
                 </tr>
                 {% endfor %}
