@@ -184,7 +184,7 @@ def generate_random_code(length=6):
     return random.randint(start, end)
 
 
-@app.route('/', methods=['GET', 'POST'])
+@app.route('/application-form', methods=['GET', 'POST'])
 def index():
     error_message = None
     role = None
@@ -462,31 +462,6 @@ def delete_file(file_id):
         flash('File not found in the database.', 'danger')
 
     return redirect(url_for('admin_panel'))
-
-#edit files
-# @app.route('/edit_file/<int:file_id>', methods=['GET', 'POST'])
-# def edit_file(file_id):
-#     # Fetch the file from the database using its ID
-#     file_to_edit = job_desc_files.query.get(file_id)
-
-#     if not file_to_edit:
-#         flash('File not found.', 'danger')
-#         return redirect(url_for('admin_panel'))
-
-#     if request.method == 'POST':
-#         # Get updated values from the form
-#         new_filename = request.form.get('filename')
-#         new_file_type_name = request.form.get('file_type_name')
-
-#         # Update file information
-#         file_to_edit.filename = new_filename
-#         file_to_edit.file_type_name = new_file_type_name
-#         db.session.commit()
-
-#         flash('File updated successfully!', 'success')
-#         return redirect(url_for('admin_panel'))
-
-#     return render_template('admin_panel', file=file_to_edit)
 
 # Admin route to generate access code
 # Admin route to generate access code
