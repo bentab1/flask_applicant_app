@@ -62,57 +62,63 @@
       </section>
     {% endif %}
 
-    <form method="POST" enctype="multipart/form-data">
-      <!-- CSRF token included here -->
+            
+        <!-- File Upload Form -->
+        <form method="POST" enctype="multipart/form-data" style="margin-top: 40px;">
+          <label for="file_type_name">File Type Name:</label>
+          <input type="text" id="file_type_name" name="file_type_name" required>
+
+          <label for="file_description">File Description:</label>
+          <input type="text" id="file_description" name="file_description" required>
+
+          <label for="file">Upload File:</label>
+          <input type="file" id="file" name="file" required>
+
+          <!-- Hidden input to capture admin's choice -->
+          <input type="hidden" id="replace" name="replace" value="no">
+
+          <button type="submit">Upload</button>
+        </form>
+
   
-      <label for="file">Upload File:</label>
-      <input type="file" name="file" id="file" required><br>
-  
-      <label for="file_type_name">File Type Name:</label>
-      <input type="text" name="file_type_name" id="file_type_name" required><br>
-  
-      <label for="file_description">File Description:</label>
-      <textarea name="file_description" id="file_description" required></textarea><br>
-  
-      <button type="submit">Upload</button>
-  </form>
-  
- <!-- file upload and delete -->
- <h2>Uploaded Files</h2>
- <table border="1">
-     <thead>
-         <tr>
-             <th>ID</th>
-             <th>File Type Name</th>
-             <th>Description</th>
-             <th>Filename</th>
-             <th>Uploaded At</th>
-             <th>Actions</th>
-         </tr>
-     </thead>
-     <tbody>
-         {% for file in files %}
-         <tr>
-             <td>{{ file.id }}</td>
-             <td>{{ file.file_type_name }}</td>
-             <td>{{ file.file_description }}</td>
-             <td>{{ file.filename }}</td>
-             <td>{{ file.uploaded_at }}</td>
-             <td>
-              <a href="{{ url_for('download_file', file_type_name=file.file_type_name, filename=file.filename) }}">Download</a>|
-                 <!-- Form to trigger DELETE request -->
-                 <form action="{{ url_for('delete_file', file_id=file.id) }}" method="POST" style="display:inline;">
-                  <input type="submit" value="Delete" onclick="return confirm('Are you sure you want to delete this file?');" style="color: white; background-color: red; border: none; padding: 5px 10px; cursor: pointer;">
-              </form>
-              
-             </td>
-         </tr>
-         {% endfor %}
-     </tbody>
- </table>
- 
-  
-  
+ <!-- File Upload and Delete -->
+<h2>Uploaded Files</h2>
+<table border="1" style="width: 100%; border-collapse: collapse;">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>File Type Name</th>
+            <th>Description</th>
+            <!-- <th>Uploaded At</th> -->
+            <th>Download</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for file in files %}
+        <tr>
+            <td>{{ file.id }}</td>
+            <td>{{ file.file_type_name }}</td>
+            <td>{{ file.file_description }}</td>
+            <!-- <td>{{ file.uploaded_at }}</td> -->
+            
+            <!-- Separate cell for Download button -->
+            <td>
+                <a href="{{ url_for('download_file', file_type_name=file.file_type_name, filename=file.filename) }}">Download</a>
+            </td>
+            
+            <!-- Separate cell for Delete button -->
+            <td>
+                <form action="{{ url_for('delete_file', file_id=file.id, file_type_name=file.file_type_name) }}" method="POST" style="display:inline;">
+                    <div class="form-group" >
+                        <input type="submit" value="Delete" onclick="return confirm('Are you sure you want to delete this file?');" style="color: white; background-color: red; border: none; padding: 5px 10px; cursor: pointer;">
+                    </div>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
 
     <!-- Role Management Section -->
     <section class="role-management">
@@ -199,5 +205,42 @@
       });
     });
   </script>
+
+  
+<!-- Add some styling -->
+<!-- <style>
+  table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+  }
+
+  th, td {
+      padding: 8px;
+      text-align: left;
+      border: 1px solid #ddd;
+  }
+
+  th {
+      background-color: #f4f4f4;
+  }
+
+  .form-group {
+      margin-bottom: 10px;
+  }
+
+  .submit-btn {
+      padding: 8px 16px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      cursor: pointer;
+  }
+
+  .submit-btn:hover {
+      background-color: #45a049;
+  }
+</style> -->
+
 </body>
 </html>

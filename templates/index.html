@@ -34,13 +34,30 @@
 
     <h2>Please check the Job Portal below, come back and apply</h2>
     <p>
-        <strong>Note:</strong></br> Click on the green button below to check, read, and explore the job descriptions for all available jobs/roles. After reviewing, return and apply for the one that matches your skills and experience.
+        <strong>Note:</strong></br> Click on the blue button below to check, read, and explore the job descriptions for all available jobs/roles. After reviewing, return and apply for the one that matches your skills and experience.
         Please do not apply for any job for which you do not have the required skills and experience, as your application will not be considered.</br> You are only allowed to apply for one role</br>
         Thank you!
     </p>
-   <a href="{{ url_for('job_descriptions') }}">
-    <button style="margin-bottom: 30px;">Click here to view Jobs Descriptions ></button>
-   </a>
+    <a href="{{ url_for('job_descriptions') }}">
+      <button style="
+          margin-bottom: 30px; 
+          background-color: #007BFF; 
+          color: white; 
+          border: none; 
+          padding: 10px 20px; 
+          border-radius: 5px; 
+          cursor: pointer; 
+          font-size: 16px; 
+          font-weight: bold;
+          box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+          transition: background-color 0.3s ease;
+      " 
+      onmouseover="this.style.backgroundColor='#0056b3';"
+      onmouseout="this.style.backgroundColor='#007BFF';">
+          Click here to view Job Descriptions >
+      </button>
+  </a>
+  
 
 
      <!-- Hide form if application is successful or already applied -->
@@ -227,9 +244,6 @@
           <input type="text" id="salary" name="salary_expectation" placeholder="Enter your salary expectation" required min="0" step="500" style="font-size: 1.2em;">
         </div>
       </div>
-
-
-
 
       <!-- Access Code Input -->
       <label for="accesscode" style="font-weight: bold;margin-top: 30px;">Enter Access Code:</label>

@@ -21,7 +21,7 @@ app = Flask(__name__)
 load_dotenv()  # Load environment variables from .env file
 
 # app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'postgresql://postgres:deployment1234@154.53.42.12/deployment')
-app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'postgresql://postgres:1234Abcd@154.53.42.12/deployment')
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'postgresql://postgres:deployment1234@154.53.42.12/deployment')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # Setup folder to save CV and Cover Letter
@@ -34,8 +34,14 @@ app.config['ALLOWED_EXTENSIONS'] = {'pdf', 'doc', 'docx'}
 # Set maximum content length (2MB)
 app.config['MAX_CONTENT_LENGTH'] = 2 * 1024 * 1024  # 2MB limit
 
+# Set maximum content length (2MB)
+MAX_FILE_SIZE = 2 * 1024 * 1024  # 3MB
+
 # Configure your upload folder
-app.config['UPLOAD_FOLDER'] = 'static/job_description_files'  # Update this path to where you want to store the uploaded files
+app.config['JOB_DESCRIPTION_UPLOAD_FOLDER'] = 'File\\job_descriptions'
+app.config['FILES_UPLOAD_FOLDER'] = 'Files'
+
+# Update this path to where you want to store the uploaded files
 app.config['ALLOWED_EXTENSIONS'] = {'pdf'}  # Only allow PDF files
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB limit for file uploads
 
@@ -66,10 +72,10 @@ class FileUploadForm(FlaskForm):
     submit = SubmitField('Upload')
 
 
-class File(db.Model):
+class job_desc_files(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     file_type_name = db.Column(db.String(100), nullable=False)  # Name of the file type
-    file_description = db.Column(db.Text, nullable=False)  # Description of the file
+    file_description = db.Column(db.String, nullable=False)  # Description of the file
     filename = db.Column(db.String(200), nullable=False)  # Actual file path/name
     uploaded_at = db.Column(db.DateTime, default=datetime.utcnow)  # Timestamp for upload
 
@@ -178,7 +184,7 @@ def generate_random_code(length=6):
     return random.randint(start, end)
 
 
-@app.route('/applicantion-form', methods=['GET', 'POST'])
+@app.route('/application-form', methods=['GET', 'POST'])
 def index():
     error_message = None
     role = None
@@ -205,7 +211,7 @@ def index():
 @app.route('/job-descriptions')
 def job_descriptions():
     # Fetch all uploaded files from the database
-    files = File.query.all()
+    files = job_desc_files.query.all()
     return render_template('job_descriptions.html', files=files)
 
 
@@ -258,6 +264,7 @@ def submit():
     # Securely save file and get file path
     cv_filename = secure_filename(cv_file.filename)
     cover_letter_filename = secure_filename(cover_letter_file.filename)
+    
 
     # Create folder structure
     role_folder = os.path.join(app.config['UPLOAD_FOLDER'], role)
@@ -329,7 +336,8 @@ def submit():
     flash("Your application has been submitted successfully!", "success")
     # Redirect to the home page with success message
     return redirect(url_for('index', success=True))
-    
+
+
 @app.route('/admin', methods=['GET', 'POST'])
 @admin_required
 def admin_panel():
@@ -337,42 +345,68 @@ def admin_panel():
 
     if request.method == 'POST':
         if 'file' in request.files:
-            file = request.files.get('file')
-            file_type_name = request.form.get('file_type_name', 'Untitled').strip()
+            file = request.files['file']
+            file_type_name = request.form.get('file_type_name', '').strip()
             file_description = request.form.get('file_description', '').strip()
-
+           
             if file and file_type_name and file_description:
-                if not file.filename.endswith('.pdf'):
-                    flash('Invalid file type! Please upload a PDF file.', 'danger')
+                # Check file extension
+                if not allowed_file(file.filename):
+                    flash('File not allowed. Please choose another file type (Allowed: .pdf, .doc, .docx).', 'danger')
+                    return redirect(url_for('admin_panel'))
+
+                # Check file size
+                file.seek(0, os.SEEK_END)
+                file_size = file.tell()
+                file.seek(0, os.SEEK_SET)
+
+                if file_size > MAX_FILE_SIZE:
+                    flash('File size exceeds the maximum limit of 2MB.', 'danger')
+                    return redirect(url_for('admin_panel'))
+
+                # Check if file already exists
+                existing_file = job_desc_files.query.filter_by(file_type_name=file_type_name).first()
+
+                if existing_file:
+                    # Prompt admin for replacement confirmation
+                    replace = request.form.get('replace', 'no') == 'yes'
+                    if not replace:
+                        flash(f'A file with type "{file_type_name}" already exists. Confirm replacement.', 'warning')
+                        return redirect(url_for('admin_panel'))
+
+                    # Update existing file metadata and replace file
+                    existing_file.file_description = file_description
+                    filename = secure_filename(file.filename)
+                    job_desc_folder = os.path.join(app.config['UPLOAD_FOLDER'], 'job_descriptions', file_type_name)
+                    os.makedirs(job_desc_folder, exist_ok=True)
+                    file_path = os.path.join(job_desc_folder, filename)
+                    file.save(file_path)
+                    existing_file.filename = filename
+
                 else:
-                    existing_file = File.query.filter_by(file_type_name=file_type_name).first()
-                    if existing_file:
-                        flash('This file type has already been uploaded. Please choose another.', 'danger')
-                    else:
-                        # Directory structure: job_descriptions//file_type_name//filename
-                        job_desc_folder = os.path.join(
-                            app.config['UPLOAD_FOLDER'], 'job_descriptions', file_type_name
-                        )
-                        os.makedirs(job_desc_folder, exist_ok=True)
+                    # Create directory structure and save new file
+                    filename = secure_filename(file.filename)
+                    job_desc_folder = os.path.join(app.config['UPLOAD_FOLDER'], 'job_descriptions', file_type_name)
+                    os.makedirs(job_desc_folder, exist_ok=True)
+                    file_path = os.path.join(job_desc_folder, filename)
+                    file.save(file_path)
 
-                        filename = secure_filename(file.filename)
-                        file_path = os.path.join(job_desc_folder, filename)
-                        file.save(file_path)
+                    # Save metadata to the database
+                    new_file = job_desc_files(
+                        file_type_name=file_type_name,
+                        file_description=file_description,
+                        filename=filename
+                    )
+                    db.session.add(new_file)
 
-                        # Save metadata to the database
-                        new_file = File(
-                            file_type_name=file_type_name,
-                            file_description=file_description,
-                            filename=filename
-                        )
-                        db.session.add(new_file)
-                        db.session.commit()
-                        flash('File uploaded successfully!', 'success')
+                db.session.commit()
+                flash('File uploaded successfully!', 'success')
             else:
                 flash('Please provide a file, file type name, and description.', 'danger')
 
+        # Handle role status changes
         for role in request.form:
-            if role not in {'form_open', 'file_type_name', 'file_description', 'file'}:
+            if role not in {'form_open', 'file_type_name', 'file_description', 'file', 'replace'}:
                 role_status = RoleStatus.query.filter_by(role_name=role).first()
                 if role_status:
                     role_status.is_active = role in request.form
@@ -384,11 +418,13 @@ def admin_panel():
         flash('Settings updated successfully!', 'success')
         return redirect(url_for('admin_panel'))
 
+    # Fetch roles and files for the admin panel view
     roles = RoleStatus.query.order_by(RoleStatus.role_name).all()
     all_codes = AccessCode.query.order_by(AccessCode.created_at.desc()).limit(2).all()
-    files = File.query.all()
+    files = job_desc_files.query.all()
 
     return render_template('admin_panel.html', form_open=FORM_OPEN, roles=roles, all_codes=all_codes, files=files)
+
 
 @app.route('/uploads/<file_type_name>/<filename>')
 def download_file(file_type_name, filename):
@@ -399,27 +435,29 @@ def download_file(file_type_name, filename):
     except FileNotFoundError:
         flash("File not found.", "danger")
         return redirect(url_for('admin_panel'))
-    
-    
-    #Define delete route
+
+
+# Define delete route
 @app.route('/delete_file/<int:file_id>', methods=['POST'])
 def delete_file(file_id):
-    # Get the file from the database by ID
-    file_to_delete = File.query.get(file_id)
+    file_to_delete = job_desc_files.query.get(file_id)
 
     if file_to_delete:
-        # Delete the file from the file system
-        job_desc_folder = os.path.join(current_app.config['UPLOAD_FOLDER'], 'job_descriptions')
+        # Use file_type_name directly as folder
+        job_desc_folder = os.path.join(current_app.config['UPLOAD_FOLDER'], 'job_descriptions', file_to_delete.file_type_name)
         file_path = os.path.join(job_desc_folder, file_to_delete.filename)
 
         try:
-            os.remove(file_path)  # Remove the file from the server
-            db.session.delete(file_to_delete)  # Remove the file entry from the database
-            db.session.commit()
-            flash('File deleted successfully!', 'success')
-        except FileNotFoundError:
-            flash('File not found on the server.', 'danger')
-            return redirect(url_for('admin_panel'))
+            if os.path.exists(file_path):
+                os.remove(file_path)  # Remove the file from the server
+                db.session.delete(file_to_delete)  # Remove the file entry from the database
+                db.session.commit()
+                flash('File deleted successfully!', 'success')
+            else:
+                flash(f'File not found at {file_path}.', 'danger')
+        except Exception as e:
+            app.logger.error(f"Error while deleting file: {e}")
+            flash('An error occurred while trying to delete the file.', 'danger')
     else:
         flash('File not found in the database.', 'danger')
 
@@ -521,7 +559,7 @@ def login():
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
-        if username == 'admin' and password == 'admin123@admin123':
+        if username == 'admin' and password == 'admin123admin':
             session['is_admin'] = True
             return redirect(url_for('admin_panel'))
         flash('Invalid credentials', 'danger')
@@ -546,7 +584,7 @@ def check_session_timeout():
         # Ensure both datetimes are naive or aware
         now = datetime.now().astimezone(last_activity.tzinfo) if last_activity.tzinfo else datetime.now()
 
-        if (now - last_activity).total_seconds() > 120:  # 15 seconds timeout
+        if (now - last_activity).total_seconds() > 1000:  # 15 seconds timeout
             session.clear()  # Clear the entire session to avoid residual data
             flash("Session timed out due to inactivity. Please log in again.", "danger")
             return redirect(url_for('login'))  # Redirect to login page
