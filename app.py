@@ -582,7 +582,7 @@ def check_session_timeout():
         # Ensure both datetimes are naive or aware
         now = datetime.now().astimezone(last_activity.tzinfo) if last_activity.tzinfo else datetime.now()
 
-        if (now - last_activity).total_seconds() > 1000:  # 15 seconds timeout
+        if (now - last_activity).total_seconds() > 10000:  # 15 seconds timeout
             session.clear()  # Clear the entire session to avoid residual data
             flash("Session timed out due to inactivity. Please log in again.", "danger")
             return redirect(url_for('login'))  # Redirect to login page
