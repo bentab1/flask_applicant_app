@@ -95,7 +95,7 @@
                
               </div>
               
-              <select id="state" name="state"  class="hidden">
+              <select id="state" name="state" autocomplete="off"  class="hidden">
                 <option value="" disabled selected>Select your state of residence</option>
                 <!-- Nigerian states -->
                 <option value="Abia">Abia</option>
@@ -174,7 +174,7 @@
       
             <div id="otherCountryInputs" style="display: none;">
               <label for="Province">State/Province:</label>
-              <input type="text" id="province" name="province" class="hidden" placeholder="Enter State/Province">
+              <input type="text" id="province" name="province" autocomplete="off" class="hidden" placeholder="Enter State/Province">
               <br><br>
             </div>
             <label for="city">City:</label>
@@ -524,6 +524,8 @@ document.querySelectorAll('textarea').forEach(textarea => {
       // Make LGA and Ward optional
       lgaField.attr('required', false).prop('disabled', false);
       wardField.attr('required', false).prop('disabled', false);
+      stateField.attr('required', false).prop('disabled', false);
+
 
       lgaLabel.removeClass('hidden');
       wardLabel.removeClass('hidden');
@@ -533,6 +535,13 @@ document.querySelectorAll('textarea').forEach(textarea => {
       ProvinceField.removeClass('hidden').attr('required', true).prop('disabled', false);
     }
   }
+
+      document.addEventListener('DOMContentLoaded', function () {
+      const inputs = document.querySelectorAll('input');
+      inputs.forEach(input => {
+        console.log(input.name, input.value);
+      });
+    });
 
   // Initialize field visibility based on the initial state value
   updateFieldVisibility();
