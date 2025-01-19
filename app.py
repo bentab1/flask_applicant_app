@@ -22,7 +22,7 @@ app = Flask(__name__)
 load_dotenv()  # Load environment variables from .env file
 
 # app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'postgresql://postgres:deployment1234@154.53.42.12/deployment')
-app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'postgresql://postgres:1234Abcd@154.53.42.12/deployment')
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'postgresql://postgres:Ubmc1987#$@127.0.0.1:5432/paycare_ats')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # Setup folder to save CV and Cover Letter
@@ -201,7 +201,7 @@ def generate_random_code(length=6):
     return random.randint(start, end)
 
 
-@app.route('/application-form', methods=['GET', 'POST'])
+@app.route('/', methods=['GET', 'POST'])
 def index():
     error_message = None
     role = None
@@ -292,12 +292,19 @@ def submit():
     # Securely save file and get file path
     cv_filename = secure_filename(cv_file.filename)
     cover_letter_filename = secure_filename(cover_letter_file.filename)
-    
-
+   
+   ##if state does not exist then deafaul state is NUll
+    if not state:
+        state = "null"
+    ##if state does not exist then deafaul state is NUll
+    if not province:
+        province = "null"
+        
     # Create folder structure
     role_folder = os.path.join(app.config['UPLOAD_FOLDER'], role)
-    state_or_province_folder = os.path.join(role_folder, state or province)  # Use state_province as folder
-    city_folder = os.path.join(state_or_province_folder, city)
+    state_folder = os.path.join(role_folder, state)  # Use state_province as folder
+    province_folder = os.path.join(role_folder, province)  # Use state_province as folder
+    city_folder = os.path.join(state_folder or province_folder, city)
     applicant_folder = os.path.join(city_folder, name)
 
     # Check if the role folder exists, if not create it
@@ -305,8 +312,12 @@ def submit():
         os.makedirs(role_folder)
 
     # Check if the state/province folder exists, if not create it
-    if not os.path.exists(state_or_province_folder):
-        os.makedirs(state_or_province_folder)
+    if not os.path.exists(state_folder):
+        os.makedirs(state_folder)
+
+        # Check if the state/province folder exists, if not create it
+    if not os.path.exists(province_folder):
+        os.makedirs(province_folder)
 
     # Ensure city_folder is created if it doesn't exist
     if not os.path.exists(city_folder):
