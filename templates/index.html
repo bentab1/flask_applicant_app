@@ -245,20 +245,22 @@
             <label for="accesscode" style="font-weight: bold;margin-top: 30px;">Enter Access Code:</label>
             <input type="text" id="accesscode" name="accesscode" placeholder="Enter access code" required><br>
 
-  <h3 style="color:#1d0bac;font-weight: bold">Tell us a bit about yourself, your experience, and what excites you about this role.<br> We’d love to hear your thoughts and why you’re a great fit for our team!</h3>
-
+     <div>
+  <h2>9 Optional Questionnaires</h2>
+  <h3 style="color:#1d0bac;font-weight: bold">Tell us a bit about yourself, your experience, and what excites you about this role.We’d love to hear your thoughts and why you’re a great fit for our team!</h3>
  <!-- Question 1 -->
 <div class="question" id="q1">
-  <label for="how_did_you_hear">How did you hear about us? (Optional)</label>
+  <label for="how_did_you_hear">1. How did you hear about us? (Optional)</label>
   <textarea name="how_did_you_hear" rows="4" maxlength="200" oninput="limitWords(this, 100)" placeholder="100 words maximum"></textarea>
   <p id="how_did_you_hear-error" style="color: red; display: none;">Please limit your response to 100 words.</p><br><br>
   <button type="button" onclick="previousQuestion()" style="background-color: #007BFF; color: white">Previous</button>
   <button type="button" onclick="nextQuestion(1)" style="background-color: #007BFF; color: white">Next</button>
 </div>
+</div>
 
 <!-- Question 2 -->
 <div class="question" id="q2">
-  <label for="why_apply_role">Why do you want to apply for this role? (Optional)</label>
+  <label for="why_apply_role">2. Why do you want to apply for this role? (Optional)</label>
   <textarea name="why_apply_role" rows="4" maxlength="500" oninput="limitWords(this, 500)"placeholder="500 words maximum"></textarea>
   <p id="why_apply_role-error" style="color: red; display: none;">Please limit your response to 500 words.</p><br><br>
   <button type="button" onclick="previousQuestion(2)" style="background-color:#007BFF; color: white">Previous</button>
@@ -267,7 +269,7 @@
 
 <!-- Question 3 -->
 <div class="question" id="q3">
-  <label for="computer_knowledge_rating">How would you rate your computer knowledge (1-10)? (Optional)</label>
+  <label for="computer_knowledge_rating">3. How would you rate your computer knowledge (1-10)? (Optional)</label>
   <input type="number" id="computer_knowledge_rating" name="computer_knowledge_rating" min="1" max="10" placeholder="must be numbers from 1 to 10">
   <p id="errorMessage" style="color: red; display: none;">Please enter a valid number between 1 and 10.</p><br><br>
   <button type="button" onclick="previousQuestion(3)" style="background-color: #007BFF; color: white">Previous</button>
@@ -276,7 +278,7 @@
 
 <!-- Question 4 -->
 <div class="question" id="q4">
-  <label for="software_tools_knowledge">What software/tools do you know? (Optional)</label>
+  <label for="software_tools_knowledge">4. What software/tools do you know? (Optional)</label>
   <textarea name="software_tools_knowledge" rows="4" maxlength="500" oninput="limitWords(this, 500)" placeholder="500 words maximum"></textarea>
   <p id="software_tools_knowledge-error" style="color: red; display: none;">Please limit your response to 500 words.</p><br><br>
   <button type="button" onclick="previousQuestion(4)" style="background-color:#007BFF; color: white">Previous</button>
@@ -285,7 +287,7 @@
 
 <!-- Question 5 -->
 <div class="question" id="q5">
-  <label for="skills_for_role">What skills do you have for this role? (Optional)</label>
+  <label for="skills_for_role">5. What skills do you have for this role? (Optional)</label>
   <textarea name="skills_for_role" rows="4" maxlength="500" oninput="limitWords(this, 500)" placeholder="500 words maximum"></textarea>
   <p id="skills_for_role-error" style="color: red; display: none;">Please limit your response to 500 words.</p><br><br>
   <button type="button" onclick="previousQuestion(5)" style="background-color:#007BFF; color: white">Previous</button>
@@ -294,7 +296,7 @@
 
 <!-- Question 6 -->
 <div class="question" id="q6">
-  <label for="educational_qualification">What is your educational qualification? (Optional)</label>
+  <label for="educational_qualification">6. What is your educational qualification? (Optional)</label>
   <textarea name="educational_qualification" rows="4" maxlength="500" oninput="limitWords(this, 500)" placeholder="500 words maximum"></textarea>
   <p id="educational_qualification-error" style="color: red; display: none;">Please limit your response to 500 words.</p><br><br>
   <button type="button" onclick="previousQuestion(6)" style="background-color: #007BFF; color: white">Previous</button>
@@ -303,7 +305,7 @@
 
 <!-- Question 7 -->
 <div class="question" id="q7">
-  <label for="years_of_experience">How many years of experience do you have in this role? (Optional)</label>
+  <label for="years_of_experience">7. How many years of experience do you have in this role? (Optional)</label>
   <input type="number" name="years_of_experience" min="1" step="1" placeholder="must be numbers(from 1 and above)">
   <p id="errorMessage7" style="color: red; display: none;">Please enter a valid number (1 or higher).</p><br><br>
   <button type="button" onclick="previousQuestion(7)" style="background-color: #007BFF; color: white">Previous</button>
@@ -312,7 +314,7 @@
 
 <!-- Question 8 -->
 <div class="question" id="q8">
-  <label for="why_work_with_paycare">Why do you want to work with PayCare? (Optional)</label>
+  <label for="why_work_with_paycare">8. Why do you want to work with PayCare? (Optional)</label>
   <textarea name="why_work_with_paycare" rows="4" maxlength="500" oninput="limitWords(this, 500)" placeholder="500 words maximum"></textarea>
   <p id="why_work_with_paycare-error" style="color: red; display: none;">Please limit your response to 500 words.</p><br><br>
   <button type="button" onclick="previousQuestion(8)" style="background-color: #007BFF; color: white">Previous</button>
@@ -321,7 +323,7 @@
 
 <!-- Question 9 -->
 <div class="question" id="q9">
-  <label for="yourself_and_background">Tell us about yourself and your background: (Optional)</label>
+  <label for="yourself_and_background">9. Tell us about yourself and your background: (Optional)</label>
   <textarea name="yourself_and_background" rows="4" maxlength="1000" oninput="limitWords(this, 1000)" placeholder="1000 words maximum"></textarea>
   <p id="yourself_and_background-error" style="color: red; display: none;">Please limit your response to 1000 words.</p><br><br>
   <button type="button" onclick="previousQuestion(9)" style="background-color: #007BFF; color: white">Previous</button>
