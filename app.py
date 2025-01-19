@@ -22,7 +22,7 @@ app = Flask(__name__)
 load_dotenv()  # Load environment variables from .env file
 
 # app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'postgresql://postgres:deployment1234@154.53.42.12/deployment')
-app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'postgresql://postgres:Ubmc1987#$@127.0.0.1:5432/paycare_ats')
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'postgresql://postgres:1234Abcd@154.53.42.12/deployment')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # Setup folder to save CV and Cover Letter
@@ -201,7 +201,7 @@ def generate_random_code(length=6):
     return random.randint(start, end)
 
 
-@app.route('/', methods=['GET', 'POST'])
+@app.route('/application-form', methods=['GET', 'POST'])
 def index():
     error_message = None
     role = None
