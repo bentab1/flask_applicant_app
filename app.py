@@ -295,7 +295,7 @@ def submit():
    
    ##if state does not exist then deafaul state is NUll
     if not state:
-        state = "other_country"
+        state = "other country"
     ##if state does not exist then deafaul state is NUll
     if not province:
         province = "null"
@@ -303,7 +303,6 @@ def submit():
     # Create folder structure
     role_folder = os.path.join(app.config['UPLOAD_FOLDER'], role)
     state_folder = os.path.join(role_folder, state)  # Use state_province as folder
-    province_folder = os.path.join(role_folder, province)  # Use state_province as folder
     city_folder = os.path.join(state_folder, city)
     applicant_folder = os.path.join(city_folder, name)
 
@@ -314,10 +313,6 @@ def submit():
     # Check if the state/province folder exists, if not create it
     if not os.path.exists(state_folder):
         os.makedirs(state_folder)
-
-        # Check if the state/province folder exists, if not create it
-    if not os.path.exists(province_folder):
-        os.makedirs(province_folder)
 
     # Ensure city_folder is created if it doesn't exist
     if not os.path.exists(city_folder):

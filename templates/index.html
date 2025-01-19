@@ -497,12 +497,13 @@ document.querySelectorAll('textarea').forEach(textarea => {
 
     $(document).ready(function () {
   const stateField = $('#state');
-  const stateProvinceField = $('#state_province');
+  const ProvinceField = $('#province');
   const lgaField = $('#lga');
   const wardField = $('#ward');
-  const stateProvinceLabel = $('#stateProvinceLabel');
+  const ProvinceLabel = $('#ProvinceLabel');
   const lgaLabel = $('#lgaLabel');
   const wardLabel = $('#wardLabel');
+ 
 
   // Function to update field visibility and requirement
   function updateFieldVisibility() {
@@ -514,10 +515,10 @@ document.querySelectorAll('textarea').forEach(textarea => {
 
       lgaLabel.removeClass('hidden');
       wardLabel.removeClass('hidden');
-      stateProvinceLabel.addClass('hidden');
+      ProvinceLabel.addClass('hidden');
 
       // Hide stateProvince field
-      stateProvinceField.addClass('hidden').attr('required', false).prop('disabled', true);
+      ProvinceField.addClass('hidden').attr('required', false).prop('disabled', true);
     } else {
       // If state field is not visible or disabled
       // Make LGA and Ward optional
@@ -526,10 +527,10 @@ document.querySelectorAll('textarea').forEach(textarea => {
 
       lgaLabel.removeClass('hidden');
       wardLabel.removeClass('hidden');
-      stateProvinceLabel.removeClass('hidden');
+      ProvinceLabel.removeClass('hidden');
 
       // Show stateProvince field
-      stateProvinceField.removeClass('hidden').attr('required', true).prop('disabled', false);
+      ProvinceField.removeClass('hidden').attr('required', true).prop('disabled', false);
     }
   }
 
