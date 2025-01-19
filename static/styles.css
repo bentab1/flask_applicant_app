@@ -9,7 +9,7 @@ body {
 /* Form container with orange background */
 .form-container {
     background-color: rgb(235, 232, 226); /* Orange background for the form */
-    max-width: 800px;
+    max-width: 1000px;
     margin: 50px auto;
     padding: 20px;
     border-radius: 8px;
