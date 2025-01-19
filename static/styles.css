@@ -18,12 +18,12 @@ body {
 
 h1 {
     text-align: center;
-    color: #333;
+    color: #100f0f;
     margin-bottom: 10px;
 }
 
-h3 {
-    color: #333;
+h2 {
+    /* color: #333; */
     font-size: 1.2rem;
     color: blue;
     margin-bottom: 10px;
