@@ -201,7 +201,7 @@ def generate_random_code(length=6):
     return random.randint(start, end)
 
 
-@app.route('/gggg', methods=['GET', 'POST'])
+@app.route('/', methods=['GET', 'POST'])
 def index():
     error_message = None
     role = None
