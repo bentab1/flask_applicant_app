@@ -1,256 +1,345 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Applicant Submission Form</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
- <!-- jQuerry -->
-  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
- 
-</head>
-<body>
-  <div class="form-container">
-    <h1>Application Submission Form</h1>
-    <h3>Follow the Instructions, Please!!</h3>
-    <h5 >Note: <br/>Please make sure you select the exact Role/Job as advertised and apply for the one that matches your skils and  experience.</br> Follow all the job description instructions.</h5>
-    <p>If you encounter any problems with the application, contact us at <a href="mailto:info@paycaretech.world">info@paycaretech.world</a>.</p>
-    <p>You need to provide access code to be able to submit your application</p>
-
-    <p>Good luck!</p>
-       <!-- Flash messages -->
-    {% with messages = get_flashed_messages(with_categories=true) %}
-      {% if messages %}
-        <ul>
-          {% for category, message in messages %}
-            <li class="{{ category }}">{{ message }}</li>
-          {% endfor %}
-        </ul>
-      {% endif %}
-    {% endwith %}
-
-
-
-    <h2>Please check the Job Portal below, come back and apply</h2>
-    <p>
-        <strong>Note:</strong></br> Click on the blue button below to check, read, and explore the job descriptions for all available jobs/roles.</br> After reviewing, return and apply for the one that matches your skills and experience.
-    </br>Please do not apply for any job for which you do not have the required skills and experience, as your application will not be considered.</br> You are only allowed to apply for one role</br>
-        Thank you!
-    </p>
-    <a href="{{ url_for('job_descriptions') }}">
-      <button style="
-          margin-bottom: 30px; 
-          background-color: #007BFF; 
-          color: white; 
-          border: none; 
-          padding: 10px 20px; 
-          border-radius: 5px; 
-          cursor: pointer; 
-          font-size: 16px; 
-          font-weight: bold;
-          box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-          transition: background-color 0.3s ease;
-      " 
-      onmouseover="this.style.backgroundColor='#0056b3';"
-      onmouseout="this.style.backgroundColor='#007BFF';">
-          Click here to view Job Descriptions >
-      </button>
-  </a>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Applicant Submission Form</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+   <!-- jQuerry -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   
+  </head>
+  <body>
+    <div class="form-container">
+        <h1>Application Submission Form</h1>
+        <h3>Follow the Instructions, Please!!</h3>
+        <h5 >Note: <br/>Please make sure you select the exact Role/Job as advertised and apply for the one that matches your skils and  experience.</br> Follow all the job description instructions.</h5>
+        <p>If you encounter any problems with the application, contact us at <a href="mailto:info@paycaretech.world">info@paycaretech.world</a>.</p>
+        <p>You need to provide access code to be able to submit your application</p>
+    
+        <p>Good luck!</p>
+           <!-- Flash messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            <ul>
+              {% for category, message in messages %}
+                <li class="{{ category }}">{{ message }}</li>
+              {% endfor %}
+            </ul>
+          {% endif %}
+        {% endwith %}
+    
+        <h2>Please check the Job Portal below, come back and apply</h2>
+        <p>
+            <strong>Note:</strong></br> Click on the blue button below to check, read, and explore the job descriptions for all available jobs/roles.</br> After reviewing, return and apply for the one that matches your skills and experience.
+        </br>Please do not apply for any job for which you do not have the required skills and experience, as your application will not be considered.</br> You are only allowed to apply for one role</br>
+            Thank you!
+        </p>
+      <a href="{{ url_for('job_descriptions') }}">
+        <button style="
+            margin-bottom: 30px; 
+            background-color: #007BFF; 
+            color: white; 
+            border: none; 
+            padding: 10px 20px; 
+            border-radius: 5px; 
+            cursor: pointer; 
+            font-size: 16px; 
+            font-weight: bold;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+            transition: background-color 0.3s ease;
+            text-decoration: underline;
+        " 
+        onmouseover="this.style.backgroundColor='#0056b3';"
+        onmouseout="this.style.backgroundColor='#007BFF';">
+            Click here to view Job Descriptions >
+        </button>
+    </a>
+      <!-- Hide form if application is successful or already applied -->
+      {% if not success and not already_applied %}
+      <form id="applicantForm" action="{{ url_for('submit') }}" method="POST" enctype="multipart/form-data">
 
-
-     <!-- Hide form if application is successful or already applied -->
-     {% if not success and not already_applied %}
-    <form id="applicantForm" action="{{ url_for('submit') }}" method="POST" enctype="multipart/form-data">
-      <label for="role">Select the role/job you are applying for:</label>
-      <select id="role" name="role" required>
-        <option value="" disabled selected>Select role/job</option>
-        {% for role in active_roles %}
-          <option value="{{ role }}">{{ role }}</option>
-        {% endfor %}
-      </select>
-      <div style="margin-bottom: 10px;">
-        <label for="country" style="font-weight: bold;">Country:</label>
-      </div>
-      <select id="country" name="country" required >
-        <option value="" disabled selected>Select your country</option>
-        <option value="Nigeria">Nigeria</option>
-        <option value="Ghana">Ghana</option>
-        <option value="Kenya">Kenya</option>
-        <option value="India">India</option>
-        <option value="Pakistan">Pakistan</option>
-        <option value="USA">USA</option>
-        <option value="UK">UK</option>
-        <option value="India">India</option>
-        <option value="Australia">Australia</option>
-        <!-- Add more countries as needed -->
-      </select>
+            <label for="role">Select the role/job you are applying for:</label>
+            <select id="role" name="role" required>
+              <option value="" disabled selected>Select role/job</option>
+              {% for role in active_roles %}
+                <option value="{{ role }}">{{ role }}</option>
+              {% endfor %}
+            </select>
+            <div style="margin-bottom: 10px;">
+              <label for="country" style="font-weight: bold;">Country:</label>
+            </div>
+            <select id="country" name="country" required >
+              <option value="" disabled selected>Select your country</option>
+              <option value="Nigeria">Nigeria</option>
+              <option value="Ghana">Ghana</option>
+              <option value="Kenya">Kenya</option>
+              <option value="India">India</option>
+              <option value="Pakistan">Pakistan</option>
+              <option value="USA">USA</option>
+              <option value="UK">UK</option>
+              <option value="India">India</option>
+              <option value="Australia">Australia</option>
+              <!-- Add more countries as needed -->
+            </select>
+            
+            <div id="nigeriaInputs">
+              <div style="margin: 20px 0;">
+                <!-- State -->
+                <div style="margin-bottom: 10px;">
+                  <label for="state" style="font-weight: bold;">State:</label>
+                </div>
+                <div style="margin-bottom: 10px; font-size: 0.9em; color: #555;">
+                  If you are applying for Sales representative, please select your actual state of residence because that is the state you will be covering:
+                </div>
+               
+              </div>
+              
+              <select id="state" name="state"  class="hidden">
+                <option value="" disabled selected>Select your state of residence</option>
+                <!-- Nigerian states -->
+                <option value="Abia">Abia</option>
+                <option value="Abuja">Abuja</option>
+                <option value="Adamawa">Adamawa</option>
+                <option value="Akwa Ibom">Akwa Ibom</option>
+                <option value="Anambra">Anambra</option>
+                <option value="Bauchi">Bauchi</option>
+                <option value="Bayelsa">Bayelsa</option>
+                <option value="Benue">Benue</option>
+                <option value="Borno">Borno</option>
+                <option value="Cross River">Cross River</option>
+                <option value="Delta">Delta</option>
+                <option value="Ebonyi">Ebonyi</option>
+                <option value="Edo">Edo</option>
+                <option value="Ekiti">Ekiti</option>
+                <option value="Enugu">Enugu</option>
+                <option value="Gombe">Gombe</option>
+                <option value="Imo">Imo</option>
+                <option value="Jigawa">Jigawa</option>
+                <option value="Kaduna">Kaduna</option>
+                <option value="Kano">Kano</option>
+                <option value="Katsina">Katsina</option>
+                <option value="Kebbi">Kebbi</option>
+                <option value="Kogi">Kogi</option>
+                <option value="Kwara">Kwara</option>
+                <option value="Lagos">Lagos</option>
+                <option value="Nasarawa">Nasarawa</option>
+                <option value="Niger">Niger</option>
+                <option value="Ogun">Ogun</option>
+                <option value="Ondo">Ondo</option>
+                <option value="Osun">Osun</option>
+                <option value="Oyo">Oyo</option>
+                <option value="Plateau">Plateau</option>
+                <option value="Rivers">Rivers</option>
+                <option value="Sokoto">Sokoto</option>
+                <option value="Taraba">Taraba</option>
+                <option value="Yobe">Yobe</option>
+                <option value="Zamfara">Zamfara</option>
+                <!-- Add other states -->
+              </select>
+              <div style="margin: 20px 0;">
+                <!-- Local Government Area -->
+                <div style="margin-bottom: 10px;">
+                  <label for="lga" style="font-weight: bold;">Local Government Area (LGA):</label>
+                </div>
+                <div style="margin-bottom: 10px; font-size: 0.9em; color: #555;">
+                  If you are applying for Aggregator or Agent role, please provide your actual Local Government Area of residence because that is the region you will be covering:
+                </div>
+                <input 
+                  type="text" 
+                  id="lga" 
+                  name="lga" 
+                  class="hidden"
+                  placeholder="Enter LGA of residence" 
+                  style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; margin-bottom: 20px;"
+                >
+              
+                <!-- Council Ward -->
+                <div style="margin-bottom: 10px;">
+                  <label for="ward" style="font-weight: bold;">Your Council Ward:</label>
+                </div>
+                <div style="margin-bottom: 10px; font-size: 0.9em; color: #555;">
+                  If you are applying for Agent role, please provide your actual council ward of residence because that is where you will be covering:
+                </div>
+                <input 
+                  type="text" 
+                  id="ward" 
+                  name="ward" 
+                  class="hidden"
+                  placeholder="Enter Council Ward of residence" 
+                  style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;"
+                >
+              </div>
+            </div>
       
-      <div id="nigeriaInputs">
-        <div style="margin: 20px 0;">
-          <!-- State -->
-          <div style="margin-bottom: 10px;">
-            <label for="state" style="font-weight: bold;">State:</label>
-          </div>
-          <div style="margin-bottom: 10px; font-size: 0.9em; color: #555;">
-            If you are applying for Sales representative, please select your actual state of residence because that is the state you will be covering:
-          </div>
+            <div id="otherCountryInputs" style="display: none;">
+              <label for="state">State/Province:</label>
+              <input type="text" id="state_province" name="state_province" class="hidden" placeholder="Enter State/Province">
+              <br><br>
+            </div>
+            <label for="city">City:</label>
+            <input type="text" id="city" name="city" placeholder="Enter your city" required>
+            <label for="name">Full Name:</label>
+            <input type="text" id="name" name="name" placeholder="Enter full name" required>
          
-        </div>
-        
-        <select id="state" name="state"  class="hidden">
-          <option value="" disabled selected>Select your state of residence</option>
-          <!-- Nigerian states -->
-          <option value="Abia">Abia</option>
-          <option value="Abuja">Abuja</option>
-          <option value="Adamawa">Adamawa</option>
-          <option value="Akwa Ibom">Akwa Ibom</option>
-          <option value="Anambra">Anambra</option>
-          <option value="Bauchi">Bauchi</option>
-          <option value="Bayelsa">Bayelsa</option>
-          <option value="Benue">Benue</option>
-          <option value="Borno">Borno</option>
-          <option value="Cross River">Cross River</option>
-          <option value="Delta">Delta</option>
-          <option value="Ebonyi">Ebonyi</option>
-          <option value="Edo">Edo</option>
-          <option value="Ekiti">Ekiti</option>
-          <option value="Enugu">Enugu</option>
-          <option value="Gombe">Gombe</option>
-          <option value="Imo">Imo</option>
-          <option value="Jigawa">Jigawa</option>
-          <option value="Kaduna">Kaduna</option>
-          <option value="Kano">Kano</option>
-          <option value="Katsina">Katsina</option>
-          <option value="Kebbi">Kebbi</option>
-          <option value="Kogi">Kogi</option>
-          <option value="Kwara">Kwara</option>
-          <option value="Lagos">Lagos</option>
-          <option value="Nasarawa">Nasarawa</option>
-          <option value="Niger">Niger</option>
-          <option value="Ogun">Ogun</option>
-          <option value="Ondo">Ondo</option>
-          <option value="Osun">Osun</option>
-          <option value="Oyo">Oyo</option>
-          <option value="Plateau">Plateau</option>
-          <option value="Rivers">Rivers</option>
-          <option value="Sokoto">Sokoto</option>
-          <option value="Taraba">Taraba</option>
-          <option value="Yobe">Yobe</option>
-          <option value="Zamfara">Zamfara</option>
-          <!-- Add other states -->
-        </select>
-        <div style="margin: 20px 0;">
-          <!-- Local Government Area -->
-          <div style="margin-bottom: 10px;">
-            <label for="lga" style="font-weight: bold;">Local Government Area (LGA):</label>
-          </div>
-          <div style="margin-bottom: 10px; font-size: 0.9em; color: #555;">
-            If you are applying for Aggregator or Agent role, please provide your actual Local Government Area of residence because that is the region you will be covering:
-          </div>
-          <input 
-            type="text" 
-            id="lga" 
-            name="lga" 
-            class="hidden"
-            placeholder="Enter LGA of residence" 
-            style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; margin-bottom: 20px;"
-          >
-        
-          <!-- Council Ward -->
-          <div style="margin-bottom: 10px;">
-            <label for="ward" style="font-weight: bold;">Your Council Ward:</label>
-          </div>
-          <div style="margin-bottom: 10px; font-size: 0.9em; color: #555;">
-            If you are applying for Agent role, please provide your actual council ward of residence because that is where you will be covering:
-          </div>
-          <input 
-            type="text" 
-            id="ward" 
-            name="ward" 
-            class="hidden"
-            placeholder="Enter Council Ward of residence" 
-            style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;"
-          >
-        </div>
-      </div>
+            <div class="phone-container">
+              <label for="phone">Phone Number:</label>
+              <select id="countryCode" name="countryCode" required>
+                <option value="+234">+234 (Nigeria)</option>
+                <option value="+233">+233 (Ghana)</option>
+                <option value="+254">+254 (Kenya)</option>
+                <option value="+92">+92 (Pakistan)</option>          
+                <option value="+1">+1 (USA)</option>
+                <option value="+44">+44 (UK)</option>
+                <option value="+91">+91 (India)</option>
+                <option value="+61">+61 (Australia)</option>
+                <option value="+49">+49 (Germany)</option>
+                <option value="+33">+33 (France)</option>
+                <option value="+81">+81 (Japan)</option>
+                <option value="+39">+39 (Italy)</option>
+                <option value="+55">+55 (Brazil)</option>
+                <option value="+52">+52 (Mexico)</option>
+                <option value="+34">+34 (Spain)</option>
+                <option value="+97">+97 (Middle East)</option>
+                <option value="+63">+63 (Philippines)</option>
+                <option value="+27">+27 (South Africa)</option>
+                <option value="+20">+20 (Egypt)</option>
+                <option value="+7">+7 (Russia)</option>
+                <option value="+32">+32 (Belgium)</option>
+                <option value="+31">+31 (Netherlands)</option>
+                <option value="+81">+81 (Japan)</option>
+                <option value="+47">+47 (Norway)</option>
+                <!-- Add more countries as needed -->
+              </select>
+              <input type="tel" id="phone" name="phone" placeholder="Enter the rest 10-digit of your phone number. eg. 8160052390" pattern="[0-9]{10}" required title="Please enter exactly 11 digits" maxlength="10">
+            </div>
+      
+            <label for="email">Email Address:</label>
+            <input type="email" id="email" name="email" placeholder="Enter email address eg. johnmark@gmail.com" required pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$" title="Please enter a valid email address">
+      
+            <label for="address">Address:</label>
+            <textarea id="address" name="address" placeholder="Enter address" required></textarea>
+      
+            <label for="occupation">Current Occupation:</label>
+            <input type="text" id="occupation" name="occupation" placeholder="Enter occupation" required>
+      
+            <label for="cv">Upload CV (Accepted formats: .pdf, .doc, .docx, Max size: 2MB):</label>
+            <input type="file" id="cv" name="cv" accept=".pdf,.doc,.docx" required>
+      
+            <label for="coverLetter">Upload Cover Letter (Accepted formats: .pdf, .doc, .docx, Max size: 2MB):</label>
+            <input type="file" id="coverLetter" name="coverLetter" accept=".pdf,.doc,.docx" required>
+      
+            <!-- Salary Expectation -->
+            <div style="margin-top: 20px;">
+              <label for="salary" style="font-weight: bold;">Salary Expectation:</label>
+              <div style="margin-bottom: 10px; font-size: 0.9em; color: #555;">
+                Please provide your salary expectation per annum. <strong>Note:</strong> Agents and Aggregators are excluded.
+              </div>
+              <div style="display: flex; align-items: center;">
+                <span style="font-size: 1.2em; font-weight: bold; margin-right: 5px;">₦</span>
+                <input type="text" id="salary" name="salary_expectation" placeholder="Enter your salary expectation" required min="0" step="500" style="font-size: 1.2em;">
+              </div>
+            </div>
+      
+            <!-- Access Code Input -->
+            <label for="accesscode" style="font-weight: bold;margin-top: 30px;">Enter Access Code:</label>
+            <input type="text" id="accesscode" name="accesscode" placeholder="Enter access code" required><br>
 
-      <div id="otherCountryInputs" style="display: none;">
-        <label for="state">State/Province:</label>
-        <input type="text" id="state_province" name="state_province" class="hidden" placeholder="Enter State/Province">
-        <br><br>
-      </div>
-      <label for="city">City:</label>
-      <input type="text" id="city" name="city" placeholder="Enter your city" required>
-      <label for="name">Full Name:</label>
-      <input type="text" id="name" name="name" placeholder="Enter full name" required>
-   
-      <div class="phone-container">
-        <label for="phone">Phone Number:</label>
-        <select id="countryCode" name="countryCode" required>
-          <option value="+234">+234 (Nigeria)</option>
-          <option value="+233">+233 (Ghana)</option>
-          <option value="+254">+254 (Kenya)</option>
-          <option value="+92">+92 (Pakistan)</option>          
-          <option value="+1">+1 (USA)</option>
-          <option value="+44">+44 (UK)</option>
-          <option value="+91">+91 (India)</option>
-          <option value="+61">+61 (Australia)</option>
-          <option value="+49">+49 (Germany)</option>
-          <option value="+33">+33 (France)</option>
-          <option value="+81">+81 (Japan)</option>
-          <option value="+39">+39 (Italy)</option>
-          <option value="+55">+55 (Brazil)</option>
-          <option value="+52">+52 (Mexico)</option>
-          <option value="+34">+34 (Spain)</option>
-          <option value="+97">+97 (Middle East)</option>
-          <option value="+63">+63 (Philippines)</option>
-          <option value="+27">+27 (South Africa)</option>
-          <option value="+20">+20 (Egypt)</option>
-          <option value="+7">+7 (Russia)</option>
-          <option value="+32">+32 (Belgium)</option>
-          <option value="+31">+31 (Netherlands)</option>
-          <option value="+81">+81 (Japan)</option>
-          <option value="+47">+47 (Norway)</option>
-          <!-- Add more countries as needed -->
-        </select>
-        <input type="tel" id="phone" name="phone" placeholder="Enter the rest 10-digit of your phone number. eg. 8160052381" pattern="[0-9]{10}" required title="Please enter exactly 11 digits" maxlength="10">
-      </div>
+  <h3 style="color: rgb(29, 11, 164);font-weight: bold">Tell us a bit about yourself, your experience, and what excites you about this role.<br> We’d love to hear your thoughts and why you’re a great fit for our team!</h3>
 
-      <label for="email">Email Address:</label>
-      <input type="email" id="email" name="email" placeholder="Enter email address eg. johnmark@gmail.com" required pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$" title="Please enter a valid email address">
+ <!-- Question 1 -->
+<div class="question" id="q1">
+  <label for="how_did_you_hear">How did you hear about us? (Optional)</label>
+  <textarea name="how_did_you_hear" rows="4" maxlength="200" oninput="limitWords(this, 100)" placeholder="100 words maximum"></textarea>
+  <p id="how_did_you_hear-error" style="color: red; display: none;">Please limit your response to 100 words.</p><br><br>
+  <button type="button" onclick="previousQuestion()" style="background-color: #007BFF; color: white">Previous</button>
+  <button type="button" onclick="nextQuestion(1)" style="background-color: #007BFF; color: white">Next</button>
+</div>
 
-      <label for="address">Address:</label>
-      <textarea id="address" name="address" placeholder="Enter address" required></textarea>
+<!-- Question 2 -->
+<div class="question" id="q2">
+  <label for="why_apply_role">Why do you want to apply for this role? (Optional)</label>
+  <textarea name="why_apply_role" rows="4" maxlength="500" oninput="limitWords(this, 500)"placeholder="500 words maximum"></textarea>
+  <p id="why_apply_role-error" style="color: red; display: none;">Please limit your response to 500 words.</p><br><br>
+  <button type="button" onclick="previousQuestion(2)" style="background-color:#007BFF; color: white">Previous</button>
+  <button type="button" onclick="nextQuestion(2)" style="background-color: #007BFF; color: white">Next</button>
+</div>
 
-      <label for="occupation">Current Occupation:</label>
-      <input type="text" id="occupation" name="occupation" placeholder="Enter occupation" required>
+<!-- Question 3 -->
+<div class="question" id="q3">
+  <label for="computer_knowledge_rating">How would you rate your computer knowledge (1-10)? (Optional)</label>
+  <input type="number" id="computer_knowledge_rating" name="computer_knowledge_rating" min="1" max="10" placeholder="must be numbers 1 - 10">
+  <p id="errorMessage" style="color: red; display: none;">Please enter a valid number between 1 and 10.</p><br><br>
+  <button type="button" onclick="previousQuestion(3)" style="background-color: #007BFF; color: white">Previous</button>
+  <button type="button" onclick="nextQuestion(3)" style="background-color: #007BFF; color: white">Next</button>
+</div>
 
-      <label for="cv">Upload CV (Accepted formats: .pdf, .doc, .docx, Max size: 2MB):</label>
-      <input type="file" id="cv" name="cv" accept=".pdf,.doc,.docx" required>
+<!-- Question 4 -->
+<div class="question" id="q4">
+  <label for="software_tools_knowledge">What software/tools do you know? (Optional)</label>
+  <textarea name="software_tools_knowledge" rows="4" maxlength="500" oninput="limitWords(this, 500)" placeholder="500 words maximum"></textarea>
+  <p id="software_tools_knowledge-error" style="color: red; display: none;">Please limit your response to 500 words.</p><br><br>
+  <button type="button" onclick="previousQuestion(4)" style="background-color:#007BFF; color: white">Previous</button>
+  <button type="button" onclick="nextQuestion(4)" style="background-color: #007BFF; color: white">Next</button>
+</div>
 
-      <label for="coverLetter">Upload Cover Letter (Accepted formats: .pdf, .doc, .docx, Max size: 2MB):</label>
-      <input type="file" id="coverLetter" name="coverLetter" accept=".pdf,.doc,.docx" required>
+<!-- Question 5 -->
+<div class="question" id="q5">
+  <label for="skills_for_role">What skills do you have for this role? (Optional)</label>
+  <textarea name="skills_for_role" rows="4" maxlength="500" oninput="limitWords(this, 500)" placeholder="500 words maximum"></textarea>
+  <p id="skills_for_role-error" style="color: red; display: none;">Please limit your response to 500 words.</p><br><br>
+  <button type="button" onclick="previousQuestion(5)" style="background-color:#007BFF; color: white">Previous</button>
+  <button type="button" onclick="nextQuestion(5)" style="background-color: #007BFF; color: white">Next</button>
+</div>
 
-      <!-- Salary Expectation -->
-      <div style="margin-top: 20px;">
-        <label for="salary" style="font-weight: bold;">Salary Expectation:</label>
-        <div style="margin-bottom: 10px; font-size: 0.9em; color: #555;">
-          Please provide your salary expectation per annum. <strong>Note:</strong> Agents and Aggregators are excluded.
-        </div>
-        <div style="display: flex; align-items: center;">
-          <span style="font-size: 1.2em; font-weight: bold; margin-right: 5px;">₦</span>
-          <input type="text" id="salary" name="salary_expectation" placeholder="Enter your salary expectation" required min="0" step="500" style="font-size: 1.2em;">
-        </div>
-      </div>
+<!-- Question 6 -->
+<div class="question" id="q6">
+  <label for="educational_qualification">What is your educational qualification? (Optional)</label>
+  <textarea name="educational_qualification" rows="4" maxlength="500" oninput="limitWords(this, 500)" placeholder="500 words maximum"></textarea>
+  <p id="educational_qualification-error" style="color: red; display: none;">Please limit your response to 500 words.</p><br><br>
+  <button type="button" onclick="previousQuestion(6)" style="background-color: #007BFF; color: white">Previous</button>
+  <button type="button" onclick="nextQuestion(6)" style="background-color: #007BFF; color: white">Next</button>
+</div>
 
-      <!-- Access Code Input -->
-      <label for="accesscode" style="font-weight: bold;margin-top: 30px;">Enter Access Code:</label>
-      <input type="text" id="accesscode" name="accesscode" placeholder="Enter access code" required>
-      <label style="color: rgb(29, 11, 164);font-weight: bold;">If you are shortlisted, you will recive email from us in few weeks about your application update.</br> Good luck !!</label>
-      <button type="submit">Submit</button>
+<!-- Question 7 -->
+<div class="question" id="q7">
+  <label for="years_of_experience">How many years of experience do you have in this role? (Optional)</label>
+  <input type="number" name="years_of_experience" min="1" step="1" placeholder="must be numbers(1 and above)">
+  <p id="errorMessage7" style="color: red; display: none;">Please enter a valid number (1 or higher).</p><br><br>
+  <button type="button" onclick="previousQuestion(7)" style="background-color: #007BFF; color: white">Previous</button>
+  <button type="button" onclick="nextQuestion(7)" style="background-color: #007BFF; color: white">Next</button>
+</div>
+
+<!-- Question 8 -->
+<div class="question" id="q8">
+  <label for="why_work_with_paycare">Why do you want to work with PayCare? (Optional)</label>
+  <textarea name="why_work_with_paycare" rows="4" maxlength="500" oninput="limitWords(this, 500)" placeholder="500 words maximum"></textarea>
+  <p id="why_work_with_paycare-error" style="color: red; display: none;">Please limit your response to 500 words.</p><br><br>
+  <button type="button" onclick="previousQuestion(8)" style="background-color: #007BFF; color: white">Previous</button>
+  <button type="button" onclick="nextQuestion(8)" style="background-color: #007BFF; color: white">Next</button>
+</div>
+
+<!-- Question 9 -->
+<div class="question" id="q9">
+  <label for="yourself_and_background">Tell us about yourself and your background: (Optional)</label>
+  <textarea name="yourself_and_background" rows="4" maxlength="1000" oninput="limitWords(this, 1000)" placeholder="1000 words maximum"></textarea>
+  <p id="yourself_and_background-error" style="color: red; display: none;">Please limit your response to 1000 words.</p><br><br>
+  <button type="button" onclick="previousQuestion(9)" style="background-color: #007BFF; color: white">Previous</button>
+  <button type="button" onclick="previewAnswers()" style="background-color:#007BFF; color: white">Preview</button>
+</div>
+
+<!-- Preview Modal -->
+<div id="previewModal" style="display:none;">
+  <h2>Preview Your Responses</h2>
+  <div id="previewContent"></div><br><br>
+  <button type="button" onclick="editAnswers()" style="background-color:#007BFF; color: white">Edit Answers</button>
+  <p style="color: rgb(29, 11, 164);font-weight: bold;">If you are shortlisted, you will receive an email from us in a few weeks about your application update.</br> Good luck !!</p> 
+  <button type="submit" style="width: 100%;  background-color: #007BFF; color: white; padding: 10px; border: none; cursor: pointer;">Submit</button>
+</div>
+    </div>
+    
     </form>
+
     {% endif %}
 
     <!-- Message if the user already applied -->
@@ -259,9 +348,129 @@
       <p>You have already applied with this phone number or email.</p>
     </div>
     {% endif %}
-  </div>
 
+    <script>
+
+
+
+ // Check word limit and display error message if exceeded
+ function checkWordLimit(input, maxLength, errorMessageId) {
+    const errorMessage = document.getElementById(errorMessageId);
+    const wordCount = input.value.trim().split(/\s+/).filter(function(word) { return word.length > 0; }).length;
+
+    if (wordCount > maxLength) {
+      errorMessage.style.display = 'block';
+    } else {
+      errorMessage.style.display = 'none';
+    }
+  }
+
+// Handling moving between questions
+function nextQuestion(questionNumber) {
+  const currentQuestion = document.getElementById('q' + questionNumber);
+  const nextQuestionNumber = questionNumber + 1;
+  const nextQuestion = document.getElementById('q' + nextQuestionNumber);
   
+  // Hide current question
+  currentQuestion.style.display = 'none';
+  
+  // Show next question if available
+  if (nextQuestion) {
+    nextQuestion.style.display = 'block';
+  }
+}
+
+// Handle previous question navigation
+function previousQuestion(questionNumber) {
+  const currentQuestion = document.getElementById('q' + questionNumber);
+  const prevQuestionNumber = questionNumber - 1;
+  const prevQuestion = document.getElementById('q' + prevQuestionNumber);
+
+  // Hide current question
+  currentQuestion.style.display = 'none';
+  
+  // Show previous question if available
+  if (prevQuestion) {
+    prevQuestion.style.display = 'block';
+  }
+}
+
+// Preview answers function
+function previewAnswers() {
+  // Hide all questions
+  document.querySelectorAll('.question').forEach(question => {
+    question.style.display = 'none';
+  });
+  
+  // Show preview modal
+  const previewContent = document.getElementById('previewContent');
+  previewContent.innerHTML = '';
+
+  // Gather all the responses
+  const responses = {
+    "How did you hear about us?": document.querySelector('[name="how_did_you_hear"]').value,
+    "Why do you want to apply for this role?": document.querySelector('[name="why_apply_role"]').value,
+    "How would you rate your computer knowledge (1-10)?": document.querySelector('[name="computer_knowledge_rating"]').value,
+    "What software/tools do you know?": document.querySelector('[name="software_tools_knowledge"]').value,
+    "What skills do you have for this role?": document.querySelector('[name="skills_for_role"]').value,
+    "What is your educational qualification?": document.querySelector('[name="educational_qualification"]').value,
+    "How many years of experience do you have in this role?": document.querySelector('[name="years_of_experience"]').value,
+    "Why do you want to work with PayCare": document.querySelector('[name="why_work_with_paycare"]').value,
+    "Tell us about yourself and your background:": document.querySelector('[name="yourself_and_background"]').value
+  };
+
+  // Display each answer in the preview
+  for (const [question, answer] of Object.entries(responses)) {
+    previewContent.innerHTML += `<strong>${question}</strong><br><p>${answer || 'No response'}</p><br>`;
+  }
+
+  // Show the modal
+  document.getElementById('previewModal').style.display = 'block';
+}
+
+// Edit answers function
+function editAnswers() {
+  // Hide the preview modal
+  document.getElementById('previewModal').style.display = 'none';
+  
+  // Show the first question again
+  document.getElementById('q1').style.display = 'block';
+}
+
+// Initial setup: Hide all questions except the first one
+document.querySelectorAll('.question').forEach((question, index) => {
+  if (index !== 0) {
+    question.style.display = 'none';
+  }
+});
+
+// Event listener for word limit check
+document.querySelectorAll('textarea').forEach(textarea => {
+  const maxLength = 1000; // Default word limit
+  const errorMessageId = `${textarea.name}-error`; // Generate the error message ID dynamically
+  const maxWords = textarea.getAttribute('maxlength') || maxLength;
+
+  textarea.addEventListener('input', () => {
+    checkWordLimit(textarea, maxWords, errorMessageId);
+  });
+});
+
+  </script>
+  <script>
+      const ratingInput = document.getElementById("computer_knowledge_rating");
+      const errorMessage = document.getElementById("errorMessage");
+    
+      ratingInput.addEventListener("input", () => {
+        const value = ratingInput.value;
+        if (value < 1 || value > 10 || isNaN(value)) {
+          errorMessage.style.display = "block"; // Show the error message
+        } else {
+          errorMessage.style.display = "none"; // Hide the error message
+        }
+      });
+    </script>
+
+    
   <script>
     document.addEventListener('DOMContentLoaded', function () {
       const countrySelect = document.getElementById('country');
@@ -335,6 +544,6 @@
 
 
   </script>
-  
+
 </body>
 </html>

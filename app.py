@@ -12,6 +12,7 @@ from flask_migrate import Migrate
 from werkzeug.exceptions import RequestEntityTooLarge
 from functools import wraps
 from datetime import datetime, timedelta
+from sqlalchemy import CheckConstraint
 import random
 import string
 import re
@@ -104,12 +105,13 @@ class AccessCode(db.Model):
 
 
 # Define the Applicants model (table)
+
 class Applicants(db.Model):
     __tablename__ = 'applicants'
 
     id = db.Column(db.Integer, primary_key=True)
     role = db.Column(db.String(100), nullable=False)
-    country = db.Column(db.String(100), nullable=False)  # New field for country
+    country = db.Column(db.String(100), nullable=False)
     state_province = db.Column(db.String(100), nullable=True)
     state = db.Column(db.String(100), nullable=False)
     lga = db.Column(db.String(100), nullable=False)
@@ -119,12 +121,27 @@ class Applicants(db.Model):
     phone = db.Column(db.String(20), nullable=False)
     email = db.Column(db.String(120), nullable=False)
     address = db.Column(db.Text, nullable=False)
-    salary_expectation = db.Column(db.Text, nullable=False)  # if you need it to store strings like "$50,000"
+    salary_expectation = db.Column(db.Text, nullable=False)
     occupation = db.Column(db.String(100), nullable=False)
     cv_file = db.Column(db.String(200), nullable=False)
     cover_letter_file = db.Column(db.String(200), nullable=False)
-    # Create the model field with the Nigerian time zone
     created_at = db.Column(db.DateTime, default=lambda: datetime.now(nigerian_tz))  # New field for date and time
+
+    # New fields with proper CheckConstraint handling
+    how_did_you_hear = db.Column(db.String(1000), nullable=True)
+    why_apply_role = db.Column(db.String(2000), nullable=True)
+    computer_knowledge_rating = db.Column(db.Integer, nullable=True)
+    software_tools_knowledge = db.Column(db.String(2000), nullable=True)
+    skills_for_role = db.Column(db.String(2000), nullable=True)
+    educational_qualification = db.Column(db.String(2000), nullable=True)
+    years_of_experience = db.Column(db.Integer, nullable=True)
+    why_work_with_paycare = db.Column(db.String(2000), nullable=True)
+    yourself_and_background = db.Column(db.String(2000), nullable=True)
+
+    # Add CheckConstraint for computer_knowledge_rating to enforce the range
+    __table_args__ = (
+        CheckConstraint('computer_knowledge_rating >= 1 AND computer_knowledge_rating <= 10', name='check_computer_knowledge_rating'),
+    )
 
     def __repr__(self):
         return f'<Applicants {self.name}>'
@@ -232,22 +249,33 @@ def submit():
     if not role_status or not role_status.is_active:
         flash("This role is closed, please check back some other time.", "danger")
         return redirect(url_for('index'))
-   
-
+    
     # Collect other form data
     name = request.form.get('name')
     phone = request.form.get('phone')
     email = request.form.get('email')
     address = request.form.get('address')
     country_code = request.form.get('countryCode')
-    state_province= request.form.get('state_province', None)  # Capture state/province field
+    state_province = request.form.get('state_province', None)  # Capture state/province field
     occupation = request.form.get('occupation')
-    salary_expectation = request.form.get('salary_expectation',None)
+    salary_expectation = request.form.get('salary_expectation', None)
     country = request.form.get('country')  # Capture country field
     state = request.form.get('state', None)
     city = request.form.get('city')
     lga = request.form.get('lga')
     ward = request.form.get('ward')
+
+    # New fields added based on the ALTER TABLE statement
+    how_did_you_hear = request.form.get('how_did_you_hear')
+    why_apply_role = request.form.get('why_apply_role')
+    computer_knowledge_rating = request.form.get('computer_knowledge_rating', None)
+    software_tools_knowledge = request.form.get('software_tools_knowledge')
+    skills_for_role = request.form.get('skills_for_role')
+    educational_qualification = request.form.get('educational_qualification')
+    years_of_experience = request.form.get('years_of_experience', None)
+    why_work_with_paycare= request.form.get('why_work_with_paycare')
+    yourself_and_background = request.form.get('yourself_and_background')
+
 
     # Combine country code and phone number
     full_phone = f"{country_code}{phone}"
@@ -312,22 +340,33 @@ def submit():
         salary_expectation = 0.0  # In case the value is not a valid number
     # Create new applicant and save to the database
     new_applicant = Applicants(
-        role=role,  # Added role/job field
-        country=country,  # Save country to the database
-        state=state,
-        city=city,
-        state_province=state_province,
-        lga=lga,
-        ward=ward,
-        name=name,
-        phone=full_phone,
-        email=email,
-        address=address,
-        occupation=occupation,
-        salary_expectation=salary_expectation,
-        cv_file=cv_path,
-        cover_letter_file=cover_letter_path
-    )
+    role=role,  # Added role/job field
+    country=country,  # Save country to the database
+    state=state,
+    city=city,
+    state_province=state_province,
+    lga=lga,
+    ward=ward,
+    name=name,
+    phone=full_phone,
+    email=email,
+    address=address,
+    occupation=occupation,
+    salary_expectation=salary_expectation,
+    cv_file=cv_path,
+    cover_letter_file=cover_letter_path,
+    # New fields added based on the form
+    how_did_you_hear=how_did_you_hear,
+    why_apply_role=why_apply_role,
+    computer_knowledge_rating=int(computer_knowledge_rating) if computer_knowledge_rating else None,  # Convert to int, or set None
+    software_tools_knowledge=software_tools_knowledge,
+    skills_for_role=skills_for_role,
+    educational_qualification=educational_qualification,
+    years_of_experience=int(years_of_experience) if years_of_experience else None,  # Convert to int, or set None
+    why_work_with_paycare=why_work_with_paycare,
+    yourself_and_background=yourself_and_background
+)
+
 
     # Add to the database session and commit to save
     db.session.add(new_applicant)
@@ -463,6 +502,34 @@ def delete_file(file_id):
 
     return redirect(url_for('admin_panel'))
 
+
+# #edit files
+# @app.route('/edit_file/<int:file_id>', methods=['GET', 'POST'])
+# def edit_file(file_id):
+#     file_to_edit = job_desc_files.query.get(file_id)
+
+#     if not file_to_edit:
+#         flash('File not found.', 'danger')
+#         return redirect(url_for('admin_panel'))
+
+#     if request.method == 'POST':
+#         # Get updated values from the form
+#         new_filename = request.form.get('filename')
+#         new_file_type_name = request.form.get('file_type_name')
+#         new_file_description = request.form.get('file_description')
+
+#         # Update file information
+#         file_to_edit.filename = new_filename
+#         file_to_edit.file_type_name = new_file_type_name
+#         file_to_edit.file_description = new_file_description
+#         db.session.commit()
+
+#         flash('File updated successfully!', 'success')
+#         return redirect(url_for('admin_panel'))
+
+#     return render_template('admin_panel', file=file_to_edit)
+
+
 # Admin route to generate access code
 # Admin route to generate access code
 @app.route('/generate_code', methods=['POST'])
@@ -582,7 +649,7 @@ def check_session_timeout():
         # Ensure both datetimes are naive or aware
         now = datetime.now().astimezone(last_activity.tzinfo) if last_activity.tzinfo else datetime.now()
 
-        if (now - last_activity).total_seconds() > 10000:  # 15 seconds timeout
+        if (now - last_activity).total_seconds() > 1000:  # 15 seconds timeout
             session.clear()  # Clear the entire session to avoid residual data
             flash("Session timed out due to inactivity. Please log in again.", "danger")
             return redirect(url_for('login'))  # Redirect to login page
