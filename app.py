@@ -112,7 +112,7 @@ class Applicants(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     role = db.Column(db.String(100), nullable=False)
     country = db.Column(db.String(100), nullable=False)
-    state_province = db.Column(db.String(100), nullable=True)
+    province = db.Column(db.String(100), nullable=True)
     state = db.Column(db.String(100), nullable=False)
     lga = db.Column(db.String(100), nullable=False)
     ward = db.Column(db.String(100), nullable=False)
@@ -256,7 +256,7 @@ def submit():
     email = request.form.get('email')
     address = request.form.get('address')
     country_code = request.form.get('countryCode')
-    state_province = request.form.get('state_province', None)  # Capture state/province field
+    province = request.form.get('province', None)  # Capture state/province field
     occupation = request.form.get('occupation')
     salary_expectation = request.form.get('salary_expectation', None)
     country = request.form.get('country')  # Capture country field
@@ -296,8 +296,8 @@ def submit():
 
     # Create folder structure
     role_folder = os.path.join(app.config['UPLOAD_FOLDER'], role)
-    state_or_state_province_folder = os.path.join(role_folder, state or state_province)  # Use state_province as folder
-    city_folder = os.path.join(state_or_state_province_folder, city)
+    state_or_province_folder = os.path.join(role_folder, state or province)  # Use state_province as folder
+    city_folder = os.path.join(state_or_province_folder, city)
     applicant_folder = os.path.join(city_folder, name)
 
     # Check if the role folder exists, if not create it
@@ -305,8 +305,8 @@ def submit():
         os.makedirs(role_folder)
 
     # Check if the state/province folder exists, if not create it
-    if not os.path.exists(state_or_state_province_folder):
-        os.makedirs(state_or_state_province_folder)
+    if not os.path.exists(state_or_province_folder):
+        os.makedirs(state_or_province_folder)
 
     # Ensure city_folder is created if it doesn't exist
     if not os.path.exists(city_folder):
@@ -344,7 +344,7 @@ def submit():
     country=country,  # Save country to the database
     state=state,
     city=city,
-    state_province=state_province,
+    province=province,
     lga=lga,
     ward=ward,
     name=name,
@@ -503,31 +503,6 @@ def delete_file(file_id):
     return redirect(url_for('admin_panel'))
 
 
-# #edit files
-# @app.route('/edit_file/<int:file_id>', methods=['GET', 'POST'])
-# def edit_file(file_id):
-#     file_to_edit = job_desc_files.query.get(file_id)
-
-#     if not file_to_edit:
-#         flash('File not found.', 'danger')
-#         return redirect(url_for('admin_panel'))
-
-#     if request.method == 'POST':
-#         # Get updated values from the form
-#         new_filename = request.form.get('filename')
-#         new_file_type_name = request.form.get('file_type_name')
-#         new_file_description = request.form.get('file_description')
-
-#         # Update file information
-#         file_to_edit.filename = new_filename
-#         file_to_edit.file_type_name = new_file_type_name
-#         file_to_edit.file_description = new_file_description
-#         db.session.commit()
-
-#         flash('File updated successfully!', 'success')
-#         return redirect(url_for('admin_panel'))
-
-#     return render_template('admin_panel', file=file_to_edit)
 
 
 # Admin route to generate access code
