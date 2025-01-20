@@ -573,7 +573,7 @@ document.querySelectorAll('textarea').forEach(textarea => {
         email: $('#email').val(),
         occupation: $('#occupation').val(),
         address: $('#address').val(),
-        salaryExpectation: $('#salary_expectation').val(),
+        salary: $('#salary').val(),
       };
       localStorage.setItem('formData', JSON.stringify(formData));
     }
@@ -595,7 +595,7 @@ document.querySelectorAll('textarea').forEach(textarea => {
         $('#email').val(savedData.email || '');
         $('#occupation').val(savedData.occupation || '');
         $('#address').val(savedData.address || '');
-        $('#salary_expectation').val(savedData.salaryExpectation || '');
+        $('#salary').val(savedData.salaryE || '');
       }
     }
 
