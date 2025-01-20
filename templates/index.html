@@ -658,51 +658,6 @@ document.querySelectorAll('textarea').forEach(textarea => {
       });
     });
   
-    // Navigation between questions
-    function nextQuestion(currentIndex) {
-      document.getElementById(`q${currentIndex}`).style.display = 'none';
-      document.getElementById(`q${currentIndex + 1}`).style.display = 'block';
-    }
-  
-    function previousQuestion(currentIndex) {
-      document.getElementById(`q${currentIndex}`).style.display = 'none';
-      document.getElementById(`q${currentIndex - 1}`).style.display = 'block';
-    }
-  
-    // Preview Responses
-    function previewAnswers() {
-      const previewContent = document.getElementById('previewContent');
-      previewContent.innerHTML = '';
-  
-      const questions = document.querySelectorAll('.question label');
-      const answers = document.querySelectorAll('.question textarea, .question input');
-  
-      questions.forEach((label, index) => {
-        const answer = answers[index].value || 'No response';
-        previewContent.innerHTML += `
-          <p><strong>${label.innerText}</strong></p>
-          <p>${answer}</p><hr>
-        `;
-      });
-  
-      document.getElementById('previewModal').style.display = 'block';
-    }
-  
-    // Edit Answers
-    function editAnswers() {
-      document.getElementById('previewModal').style.display = 'none';
-    }
-  
-    // Limit Words Function
-    function limitWords(field, maxWords) {
-      const words = field.value.split(/\s+/).filter(Boolean);
-      if (words.length > maxWords) {
-        field.value = words.slice(0, maxWords).join(' ');
-        document.getElementById(`${field.name}-error`).style.display = 'block';
-      } else {
-        document.getElementById(`${field.name}-error`).style.display = 'none';
-      }
-    }
   </script>
   
 
