@@ -353,8 +353,6 @@
 
     <script>
 
-
-
  // Check word limit and display error message if exceeded
  function checkWordLimit(input, maxLength, errorMessageId) {
     const errorMessage = document.getElementById(errorMessageId);
@@ -557,6 +555,146 @@ document.querySelectorAll('textarea').forEach(textarea => {
 
 
   </script>
+  <script>
+    $(document).ready(function () {
+      // Function to save form data to localStorage
+      function saveFormData() {
+        const formData = {
+          role: $('#role').val(),
+          country: $('#country').val(),
+          state: $('#state').val(),
+          lga: $('#lga').val(),
+          ward: $('#ward').val(),
+          province: $('#province').val(),
+          city: $('#city').val(),
+          name: $('#name').val(),
+          countryCode: $('#countryCode').val(),
+          phone: $('#phone').val(),
+        };
+        localStorage.setItem('formData', JSON.stringify(formData));
+      }
+  
+      // Function to restore form data from localStorage
+      function restoreFormData() {
+        const savedData = JSON.parse(localStorage.getItem('formData'));
+        if (savedData) {
+          $('#role').val(savedData.role || '');
+          $('#country').val(savedData.country || '');
+          $('#state').val(savedData.state || '');
+          $('#lga').val(savedData.lga || '');
+          $('#ward').val(savedData.ward || '');
+          $('#province').val(savedData.province || '');
+          $('#city').val(savedData.city || '');
+          $('#name').val(savedData.name || '');
+          $('#countryCode').val(savedData.countryCode || '');
+          $('#phone').val(savedData.phone || '');
+        }
+      }
+  
+      // Call restore function when the page loads
+      restoreFormData();
+  
+      // Save form data on input change
+      $('input, select').on('change keyup', saveFormData);
+  
+      // Clear localStorage on form submission
+      $('#applicantForm').on('submit', function () {
+        localStorage.removeItem('formData');
+      });
+  
+      // Show/hide specific inputs based on the country selection
+      $('#country').on('change', function () {
+        const selectedCountry = $(this).val();
+        if (selectedCountry === 'Nigeria') {
+          $('#nigeriaInputs').show();
+          $('#otherCountryInputs').hide();
+        } else {
+          $('#nigeriaInputs').hide();
+          $('#otherCountryInputs').show();
+        }
+      }).trigger('change');
+    });
+  </script>
+  
+  <script>
+    // Function to save responses to localStorage
+    function saveResponse(questionId, value) {
+      localStorage.setItem(questionId, value);
+    }
+  
+    // Function to load responses from localStorage
+    function loadResponses() {
+      const questions = document.querySelectorAll('.question textarea, .question input');
+      questions.forEach((field) => {
+        const savedValue = localStorage.getItem(field.name);
+        if (savedValue) {
+          field.value = savedValue;
+        }
+      });
+    }
+  
+    // Function to save response on user input
+    function handleInput(event) {
+      saveResponse(event.target.name, event.target.value);
+    }
+  
+    // Add input event listener to all fields
+    document.addEventListener('DOMContentLoaded', () => {
+      loadResponses(); // Restore responses when the page loads
+  
+      const inputs = document.querySelectorAll('.question textarea, .question input');
+      inputs.forEach((input) => {
+        input.addEventListener('input', handleInput);
+      });
+    });
+  
+    // Navigation between questions
+    function nextQuestion(currentIndex) {
+      document.getElementById(`q${currentIndex}`).style.display = 'none';
+      document.getElementById(`q${currentIndex + 1}`).style.display = 'block';
+    }
+  
+    function previousQuestion(currentIndex) {
+      document.getElementById(`q${currentIndex}`).style.display = 'none';
+      document.getElementById(`q${currentIndex - 1}`).style.display = 'block';
+    }
+  
+    // Preview Responses
+    function previewAnswers() {
+      const previewContent = document.getElementById('previewContent');
+      previewContent.innerHTML = '';
+  
+      const questions = document.querySelectorAll('.question label');
+      const answers = document.querySelectorAll('.question textarea, .question input');
+  
+      questions.forEach((label, index) => {
+        const answer = answers[index].value || 'No response';
+        previewContent.innerHTML += `
+          <p><strong>${label.innerText}</strong></p>
+          <p>${answer}</p><hr>
+        `;
+      });
+  
+      document.getElementById('previewModal').style.display = 'block';
+    }
+  
+    // Edit Answers
+    function editAnswers() {
+      document.getElementById('previewModal').style.display = 'none';
+    }
+  
+    // Limit Words Function
+    function limitWords(field, maxWords) {
+      const words = field.value.split(/\s+/).filter(Boolean);
+      if (words.length > maxWords) {
+        field.value = words.slice(0, maxWords).join(' ');
+        document.getElementById(`${field.name}-error`).style.display = 'block';
+      } else {
+        document.getElementById(`${field.name}-error`).style.display = 'none';
+      }
+    }
+  </script>
+  
 
 </body>
 </html>
