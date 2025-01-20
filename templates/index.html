@@ -555,66 +555,75 @@ document.querySelectorAll('textarea').forEach(textarea => {
 
 
   </script>
-  <script>
-    $(document).ready(function () {
-      // Function to save form data to localStorage
-      function saveFormData() {
-        const formData = {
-          role: $('#role').val(),
-          country: $('#country').val(),
-          state: $('#state').val(),
-          lga: $('#lga').val(),
-          ward: $('#ward').val(),
-          province: $('#province').val(),
-          city: $('#city').val(),
-          name: $('#name').val(),
-          countryCode: $('#countryCode').val(),
-          phone: $('#phone').val(),
-        };
-        localStorage.setItem('formData', JSON.stringify(formData));
+ <script>
+  $(document).ready(function () {
+    // Function to save form data to localStorage
+    function saveFormData() {
+      const formData = {
+        role: $('#role').val(),
+        country: $('#country').val(),
+        state: $('#state').val(),
+        lga: $('#lga').val(),
+        ward: $('#ward').val(),
+        province: $('#province').val(),
+        city: $('#city').val(),
+        name: $('#name').val(),
+        countryCode: $('#countryCode').val(),
+        phone: $('#phone').val(),
+        email: $('#email').val(),
+        occupation: $('#occupation').val(),
+        address: $('#address').val(),
+        salaryExpectation: $('#salary_expectation').val(),
+      };
+      localStorage.setItem('formData', JSON.stringify(formData));
+    }
+
+    // Function to restore form data from localStorage
+    function restoreFormData() {
+      const savedData = JSON.parse(localStorage.getItem('formData'));
+      if (savedData) {
+        $('#role').val(savedData.role || '');
+        $('#country').val(savedData.country || '');
+        $('#state').val(savedData.state || '');
+        $('#lga').val(savedData.lga || '');
+        $('#ward').val(savedData.ward || '');
+        $('#province').val(savedData.province || '');
+        $('#city').val(savedData.city || '');
+        $('#name').val(savedData.name || '');
+        $('#countryCode').val(savedData.countryCode || '');
+        $('#phone').val(savedData.phone || '');
+        $('#email').val(savedData.email || '');
+        $('#occupation').val(savedData.occupation || '');
+        $('#address').val(savedData.address || '');
+        $('#salary_expectation').val(savedData.salaryExpectation || '');
       }
-  
-      // Function to restore form data from localStorage
-      function restoreFormData() {
-        const savedData = JSON.parse(localStorage.getItem('formData'));
-        if (savedData) {
-          $('#role').val(savedData.role || '');
-          $('#country').val(savedData.country || '');
-          $('#state').val(savedData.state || '');
-          $('#lga').val(savedData.lga || '');
-          $('#ward').val(savedData.ward || '');
-          $('#province').val(savedData.province || '');
-          $('#city').val(savedData.city || '');
-          $('#name').val(savedData.name || '');
-          $('#countryCode').val(savedData.countryCode || '');
-          $('#phone').val(savedData.phone || '');
-        }
-      }
-  
-      // Call restore function when the page loads
-      restoreFormData();
-  
-      // Save form data on input change
-      $('input, select').on('change keyup', saveFormData);
-  
-      // Clear localStorage on form submission
-      $('#applicantForm').on('submit', function () {
-        localStorage.removeItem('formData');
-      });
-  
-      // Show/hide specific inputs based on the country selection
-      $('#country').on('change', function () {
-        const selectedCountry = $(this).val();
-        if (selectedCountry === 'Nigeria') {
-          $('#nigeriaInputs').show();
-          $('#otherCountryInputs').hide();
-        } else {
-          $('#nigeriaInputs').hide();
-          $('#otherCountryInputs').show();
-        }
-      }).trigger('change');
+    }
+
+    // Call restore function when the page loads
+    restoreFormData();
+
+    // Save form data on input change
+    $('input, select, textarea').on('change keyup', saveFormData);
+
+    // Clear localStorage on form submission
+    $('#applicantForm').on('submit', function () {
+      localStorage.removeItem('formData');
     });
-  </script>
+
+    // Show/hide specific inputs based on the country selection
+    $('#country').on('change', function () {
+      const selectedCountry = $(this).val();
+      if (selectedCountry === 'Nigeria') {
+        $('#nigeriaInputs').show();
+        $('#otherCountryInputs').hide();
+      } else {
+        $('#nigeriaInputs').hide();
+        $('#otherCountryInputs').show();
+      }
+    }).trigger('change');
+  });
+</script>
+
   
   <script>
     // Function to save responses to localStorage
