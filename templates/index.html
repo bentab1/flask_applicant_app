@@ -553,7 +553,6 @@ document.querySelectorAll('textarea').forEach(textarea => {
   });
 });
 
-
   </script>
  <script>
   $(document).ready(function () {
@@ -610,18 +609,6 @@ document.querySelectorAll('textarea').forEach(textarea => {
     $('#applicantForm').on('submit', function () {
       localStorage.removeItem('formData');
     });
-
-    // Show/hide specific inputs based on the country selection
-    $('#country').on('change', function () {
-      const selectedCountry = $(this).val();
-      if (selectedCountry === 'Nigeria') {
-        $('#nigeriaInputs').show();
-        $('#otherCountryInputs').hide();
-      } else {
-        $('#nigeriaInputs').hide();
-        $('#otherCountryInputs').show();
-      }
-    }).trigger('change');
   });
 </script>
 
