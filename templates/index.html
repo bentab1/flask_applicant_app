@@ -269,9 +269,9 @@
 
 <!-- Question 3 -->
 <div class="question" id="q3">
-  <label for="computer_knowledge_rating">3. How would you rate your computer knowledge (1-10)? (Optional)</label>
-  <input type="number" id="computer_knowledge_rating" name="computer_knowledge_rating" min="1" max="10" placeholder="must be numbers from 1 to 10">
-  <p id="errorMessage" style="color: red; display: none;">Please enter a valid number between 1 and 10.</p><br><br>
+  <label for="computer_knowledge_rating">3. How would you rate your computer knowledge (0-10)? (Optional)</label>
+  <input type="float" id="computer_knowledge_rating" name="computer_knowledge_rating" min="0" max="10" placeholder="must be numbers from 0 to 10">
+  <p id="errorMessage" style="color: red; display: none;">Please enter a valid number between 0 and 10.</p><br><br>
   <button type="button" onclick="previousQuestion(3)" style="background-color: #007BFF; color: white">Previous</button>
   <button type="button" onclick="nextQuestion(3)" style="background-color: #007BFF; color: white">Next</button>
 </div>
@@ -306,8 +306,8 @@
 <!-- Question 7 -->
 <div class="question" id="q7">
   <label for="years_of_experience">7. How many years of experience do you have in this role? (Optional)</label>
-  <input type="number" name="years_of_experience" min="1" step="1" placeholder="must be numbers(from 1 and above)">
-  <p id="errorMessage7" style="color: red; display: none;">Please enter a valid number (1 or higher).</p><br><br>
+  <input type="float" name="years_of_experience" min="0" placeholder="must be numbers(from 0 and above)">
+  <p id="errorMessage7" style="color: red; display: none;">Please enter a valid number (0 or higher).</p><br><br>
   <button type="button" onclick="previousQuestion(7)" style="background-color: #007BFF; color: white">Previous</button>
   <button type="button" onclick="nextQuestion(7)" style="background-color: #007BFF; color: white">Next</button>
 </div>
@@ -459,19 +459,6 @@ document.querySelectorAll('textarea').forEach(textarea => {
 
     
   <script>
-
-const ratingInput = document.getElementById("computer_knowledge_rating");
-      const errorMessage = document.getElementById("errorMessage");
-    
-      ratingInput.addEventListener("input", () => {
-        const value = ratingInput.value;
-        if (value < 1 || value > 10 || isNaN(value)) {
-          errorMessage.style.display = "block"; // Show the error message
-        } else {
-          errorMessage.style.display = "none"; // Hide the error message
-        }
-      });
-
 
     document.addEventListener('DOMContentLoaded', function () {
       const countrySelect = document.getElementById('country');
@@ -643,6 +630,40 @@ $(document).ready(function () {
     });
   
   </script>
+ <script>
+    const ratingInput = document.getElementById("computer_knowledge_rating");
+    const errorMessage = document.getElementById("errorMessage");
 
+    ratingInput.addEventListener("input", () => {
+      const value = ratingInput.value.trim(); // Get the input value
+      const isValid = /^[0-9]*\.?[0-9]*$/.test(value); // Allow only digits and a single `.`
+
+      // Check if value is a valid float between 1 and 10
+      if (!isValid || parseFloat(value) < 1 || parseFloat(value) > 10) {
+        errorMessage.style.display = "block"; // Show error message if invalid
+      } else {
+        errorMessage.style.display = "none"; // Hide error message if valid
+      }
+    });
+
+
+    const experienceInput = document.getElementById("years_of_experience");
+    const errorMessage7 = document.getElementById("errorMessage7");
+
+    experienceInput.addEventListener("input", () => {
+      const value = experienceInput.value.trim(); // Get the input value
+      const isValid = /^[0-9]*\.?[0-9]*$/.test(value); // Allow only digits and a single `.`
+
+      // Check if value is a valid float between 1 and 10
+      if (!isValid || parseFloat(value) < 1 || parseFloat(value) > 10) {
+        errorMessage7.style.display = "block"; // Show error message if invalid
+      } else {
+        errorMessage7.style.display = "none"; // Hide error message if valid
+      }
+    });
+
+
+ </script>
 </body>
+
 </html>

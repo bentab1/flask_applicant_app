@@ -298,7 +298,7 @@ def submit():
         state = "other country"
     ##if state does not exist then deafaul state is NUll
     if not province:
-        province = "null"
+        province = None
         
     # Create folder structure
     role_folder = os.path.join(app.config['UPLOAD_FOLDER'], role)
