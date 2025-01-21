@@ -1,0 +1,200 @@
+       /* Reset default browser margin and padding */
+ /* Reset default browser margin and padding */
+ * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f9f9f9;
+    margin: 20px;
+}
+
+h1 {
+    text-align: center;
+    color: #1d0bac;
+    margin-bottom: 20px;
+}
+
+        
+.container {
+    max-width: 1500px;
+    margin: 0 auto;
+    padding: 10px;
+    background-color: beige;
+    box-sizing: border-box;
+}
+
+label {
+    color: rgb(29, 11, 164);
+    font-weight: bold;
+    font-size: 18px;
+    display: block;
+    margin-bottom: 15px;
+    text-align: center;
+}
+
+table {
+    width: 100%;
+    margin-top: 20px;
+    border-collapse: collapse;
+    background-color: #fff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+th, td {
+    padding: 15px;
+    text-align: left;
+    border: 1px solid #ddd;
+}
+
+th {
+    background-color: #4CAF50;
+    color: white;
+}
+
+td a {
+    text-decoration: none;
+    color: #1d0bac;
+    font-weight: bold;
+}
+
+td a:hover {
+    color: #4CAF50;
+}
+
+.description {
+    font-size: 14px;
+    color: #555;
+}
+
+
+/* 
+@media screen and (max-width: 480px) {
+    label {
+        font-size: 14px;
+    }
+
+    h1 {
+        font-size: 22px;
+    }
+
+    table {
+        font-size: 12px;
+    }
+} */
+
+/* Styles for screens with a width of 1080px or less */
+@media screen and (max-width: 1080px)and (orientation: landscape) {
+    table, th, td {
+        font-size: 16px; /* Slightly smaller font */
+    }
+
+    label {
+        font-size: 18px;
+    }
+}
+
+/* Styles for screens with a width of 1024px or less */
+@media screen and (max-width: 1024px) and (orientation: portrait) {
+    table, th, td {
+        font-size: 15px; /* Adjust font size for medium screens */
+    }
+
+    label {
+        font-size: 17px;
+    }
+}
+
+/* Styles for screens with a width of 768px or less */
+@media screen and (max-width: 768px) {
+    table, th, td {
+        font-size: 14px; /* Smallest font for narrow screens */
+    }
+
+    label {
+        font-size: 16px;
+    }
+}
+
+
+/* For Android-specific devices */
+@media screen and (max-width: 1080px) and (orientation: landscape) {
+    .container {
+        margin: 20px;
+        padding: 18px;
+    }
+
+    button {
+        font-size: 0.9rem;
+        padding: 8px;
+    }
+}
+
+
+/* For iOS-specific devices */
+@media screen and (max-width: 1024px) and (orientation: portrait) {
+    .container {
+        padding: 15px;
+    }
+
+    h1 {
+        font-size: 1.4rem;
+    }
+}
+
+/* For larger screens (tablets, desktops) */
+@media (min-width: 768px) {
+    .container {
+        margin-top: 50px;
+    }
+}
+
+
+
+/* Responsive styling for smaller screens */
+@media screen and (max-width: 768px) {
+    table, th, td {
+        font-size: 14px;
+    }
+
+    label {
+        font-size: 16px;
+    }
+
+
+}
+
+
+/* For screens smaller than 768px (phones) */
+@media (max-width: 767px) {
+    .container {
+        padding: 15px;
+        margin: 20px;
+    }
+
+    h1 {
+        font-size: 1.5rem;
+    }
+
+    h2 {
+        font-size: 1.1rem;
+    }
+
+    h5 {
+       
+        font-weight: bold;
+    }
+
+    button {
+        font-size: 0.9rem;
+        padding: 8px;
+    }
+
+    input, select, textarea {
+        font-size: 0.9rem;
+        padding: 8px;
+    }
+}

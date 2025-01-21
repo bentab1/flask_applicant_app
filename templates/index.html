@@ -306,8 +306,8 @@
 <!-- Question 7 -->
 <div class="question" id="q7">
   <label for="years_of_experience">7. How many years of experience do you have in this role? (Optional)</label>
-  <input type="float" name="years_of_experience" min="0" placeholder="must be numbers(from 0 and above)">
-  <p id="errorMessage7" style="color: red; display: none;">Please enter a valid number (0 or higher).</p><br><br>
+  <input type="float" id="years_of_experience" min="0" placeholder="must be numbers(from 0 and above)">
+  <p id="errorMessage7" style="color: red; display: none;">Please enter a valid number from 0 and above (0 or higher).</p><br><br>
   <button type="button" onclick="previousQuestion(7)" style="background-color: #007BFF; color: white">Previous</button>
   <button type="button" onclick="nextQuestion(7)" style="background-color: #007BFF; color: white">Next</button>
 </div>
@@ -414,7 +414,7 @@ function previewAnswers() {
     "What software/tools do you know?": document.querySelector('[name="software_tools_knowledge"]').value,
     "What skills do you have for this role?": document.querySelector('[name="skills_for_role"]').value,
     "What is your educational qualification?": document.querySelector('[name="educational_qualification"]').value,
-    "How many years of experience do you have in this role?": document.querySelector('[name="years_of_experience"]').value,
+    "How many years of experience do you have in this role?": document.querySelector('[id="years_of_experience"]').value,
     "Why do you want to work with PayCare": document.querySelector('[name="why_work_with_paycare"]').value,
     "Tell us about yourself and your background:": document.querySelector('[name="yourself_and_background"]').value
   };
@@ -639,30 +639,30 @@ $(document).ready(function () {
       const isValid = /^[0-9]*\.?[0-9]*$/.test(value); // Allow only digits and a single `.`
 
       // Check if value is a valid float between 1 and 10
-      if (!isValid || parseFloat(value) < 1 || parseFloat(value) > 10) {
+      if (!isValid ||  parseFloat(value) < 0 || parseFloat(value) > 10) {
         errorMessage.style.display = "block"; // Show error message if invalid
       } else {
         errorMessage.style.display = "none"; // Hide error message if valid
       }
     });
+ </script>
 
-
-    const experienceInput = document.getElementById("years_of_experience");
+ <script>
+  
+  const experienceInput = document.getElementById("years_of_experience");
     const errorMessage7 = document.getElementById("errorMessage7");
 
     experienceInput.addEventListener("input", () => {
       const value = experienceInput.value.trim(); // Get the input value
-      const isValid = /^[0-9]*\.?[0-9]*$/.test(value); // Allow only digits and a single `.`
+      const isValid = /^[0-9]*\.?[0-9]*$/.test(value); // Allow digits, optional `.` and optional `-` for negatives
 
-      // Check if value is a valid float between 1 and 10
-      if (!isValid || parseFloat(value) < 1 || parseFloat(value) > 10) {
+      // Check if value is a valid float from 0 and above
+      if (!isValid || parseFloat(value) < 0 || isNaN(parseFloat(value))) {
         errorMessage7.style.display = "block"; // Show error message if invalid
       } else {
         errorMessage7.style.display = "none"; // Hide error message if valid
       }
     });
-
-
  </script>
 </body>
 
